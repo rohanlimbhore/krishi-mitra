@@ -30,6 +30,7 @@ def init_database():
         )
     ''')
     
+    
     # Organic Products Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS organic_products (
@@ -140,7 +141,51 @@ def search_products(search_term):
     products = cursor.fetchall()
     conn.close()
     return [dict(product) for product in products]
+    # Add this function for user management
+def create_user(mobile_email, password_hash, farmer_name, location):
+    """Create new user account."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute('''
+            INSERT INTO users (mobile_email, password_hash, farmer_name, location)
+            VALUES (?, ?, ?, ?)
+        ''', (mobile_email, password_hash, farmer_name, location))
+        
+        conn.commit()
+        return True
+    except sqlite3.IntegrityError:
+        return False
+    finally:
+        conn.close()
+
+def verify_user(mobile_email, password_hash):
+    """Verify user login."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT * FROM users 
+        WHERE mobile_email = ? AND password_hash = ?
+    ''', (mobile_email, password_hash))
+    
+    user = cursor.fetchone()
+    conn.close()
+    return user
+    
 
 # Initialize database on import
 init_database()
-  
+      # Users Table - ADD THIS
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            mobile_email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            farmer_name TEXT,
+            location TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
