@@ -251,11 +251,39 @@ def logout():
 if not st.session_state.logged_in:
     show_login()
 else:
+    # LANGUAGE SELECTION
+    if "selected_language" not in st.session_state:
+        st.session_state.selected_language = "en"
+    
+    # Sidebar language selector
+    st.sidebar.markdown("---")
+    st.sidebar.subheader("🌐 Select Language")
+    
+    language_options = {
+        "en": "English",
+        "hi": "हिंदी (Hindi)",
+        "mr": "मराठी (Marathi)",
+        "gu": "ગુજરાતી (Gujarati)",
+        "ta": "தமிழ் (Tamil)",
+        "te": "తెలుగు (Telugu)",
+        "kn": "ಕನ್ನಡ (Kannada)"
+    }
+    
+    selected_lang = st.sidebar.selectbox(
+        "Choose your language",
+        options=list(language_options.keys()),
+        format_func=lambda x: language_options[x],
+        index=list(language_options.keys()).index(st.session_state.selected_language)
+    )
+    
+    st.session_state.selected_language = selected_lang
+    
     # Show welcome banner
     st.markdown(f"""
     <div class="welcome-banner">
         <h4>👋 Welcome, {st.session_state.user['farmer_name']}!</h4>
         <p>📍 {st.session_state.user['location']} | 📱 {st.session_state.user['mobile_email']}</p>
+        <p>🌐 Language: {language_options[st.session_state.selected_language]}</p>
     </div>
     """, unsafe_allow_html=True)
     
