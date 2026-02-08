@@ -29,33 +29,43 @@ os.makedirs(VIDEOS_DIR, exist_ok=True)
 
 def text_to_speech(text, lang_code='en'):
     """
-    Simple text-to-speech using HTML5 audio.
+    Simple text-to-speech using Google Translate TTS.
+    Returns an audio player that works on all devices.
     """
+    import urllib.parse
+    import base64
+    
     # Map language codes
     lang_map = {
-        'en': 'en-IN', 'hi': 'hi-IN', 'mr': 'mr-IN',
-        'gu': 'gu-IN', 'ta': 'ta-IN', 'te': 'te-IN', 'kn': 'kn-IN'
+        'en': 'en', 'hi': 'hi', 'mr': 'mr',
+        'gu': 'gu', 'ta': 'ta', 'te': 'te', 'kn': 'kn'
     }
-    speech_lang = lang_map.get(lang_code, 'en-IN')
+    speech_lang = lang_map.get(lang_code, 'en')
     
-    # Clean text
-    clean_text = text.replace('"', "'").replace('\n', ' ')[:400]
+    # Clean and limit text
+    clean_text = text.replace('"', "'").replace('\n', ' ')[:300]
     
-    # Use Google Translate TTS (free, no API key needed)
-    import urllib.parse
+    # Encode text for URL
     encoded_text = urllib.parse.quote(clean_text)
     
-    audio_url = f"https://translate.google.com/translate_tts?ie=UTF-8&q={encoded_text}&tl={speech_lang}&client=tw-ob"
+    # Create Google TTS URL
+    tts_url = f"https://translate.google.com/translate_tts?ie=UTF-8&tl={speech_lang}&client=tw-ob&q={encoded_text}"
     
-    html_code = f"""
-    <audio controls autoplay style="width:100%; margin-top:10px;">
-        <source src="{audio_url}" type="audio/mpeg">
-        Your browser does not support audio.
-    </audio>
-    <p style="font-size:12px; color:gray;">🔊 Auto-playing in {speech_lang}</p>
+    # Return simple HTML audio player
+    audio_html = f"""
+    <div style="margin:10px 0;">
+        <audio controls style="width:100%; height:40px;">
+            <source src="{tts_url}" type="audio/mpeg">
+            Your browser does not support audio.
+        </audio>
+        <p style="font-size:11px; color:#666; margin-top:5px;">
+            🔊 Click play button to listen in {speech_lang.upper()}
+        </p>
+    </div>
     """
     
-    return html_code
+    return audio_html
+    
 
 def voice_input_widget():
     """
@@ -171,8 +181,8 @@ def run_main_app(user):
         4. **Share posts** with images and videos (MP4, max 200MB)
         5. **Browse products** from organic farmers near you
         """)
-        # =============================================================================
-    # AI FARMING ASSISTANT WITH VOICE
+            # =============================================================================
+    # AI FARMING ASSISTANT
     # =============================================================================
     elif page == "💬 AI Farming Assistant":
         st.header("💬 AI Farming Assistant")
@@ -187,15 +197,14 @@ def run_main_app(user):
         if "chat_history" not in st.session_state:
             st.session_state.chat_history = []
         
-        # Display chat history with listen buttons
+        # Display chat history
         for idx, message in enumerate(st.session_state.chat_history):
             with st.chat_message(message["role"]):
                 st.write(message["content"])
                 
                 # Add listen button for assistant messages
                 if message["role"] == "assistant":
-                    listen_key = f"listen_{idx}"
-                    if st.button("🔊 Listen", key=listen_key):
+                    if st.button("🔊 Listen", key=f"listen_{idx}"):
                         st.markdown(text_to_speech(message["content"], selected_lang), unsafe_allow_html=True)
                 
                 if "language" in message:
@@ -258,6 +267,8 @@ def run_main_app(user):
                     })
                     st.rerun()
                     
+            
+                    
     
     # =============================================================================
     # CROP DIAGNOSIS
@@ -316,15 +327,14 @@ def run_main_app(user):
                             context_lang
                         )
                         
-                        st.markdown("---")
+                                                st.markdown("---")
                         st.subheader("📋 Analysis Report")
                         st.markdown(analysis)
                         
-                        
-                        # Voice output button
-                        st.markdown("---")
+                        # ADD THIS FOR VOICE
                         if st.button("🔊 Listen to Analysis", key="listen_analysis"):
                             st.markdown(text_to_speech(analysis, context_lang), unsafe_allow_html=True)
+                            
                             
                     else:
                         st.error("Failed to process image")
@@ -361,7 +371,99 @@ def run_main_app(user):
                         if st.button(suggestion, key=f"rel_{idx}"):
                             st.rerun()
     
-        # =============================================================================
+       # =============================================================================
+    # FARMER COMMUNITY
+    # =============================================================================
+    elif page == "👥 Farmer Community":
+        st.header("👥 Farmer Community")
+        
+        tab1, tab2 = st.tabs(["📰 View Posts", "➕ Create Post"])
+        
+        # View Posts Tab
+        with tab1:
+            st.subheader("Recent Community Posts")
+            
+            posts = get_all_posts(limit=20)
+            
+            if not posts:
+                st.info("No posts yet. Be the first to share!")
+            else:
+                for post in posts:
+                    with st.container():
+                        st.markdown(f"""
+                        <div style="background-color:white; border:1px solid #E0E0E0; border-radius:10px; padding:15px; margin-bottom:15px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+                            <h4>👤 {post['farmer_name']}</h4>
+                            <p>{post['content']}</p>
+                            <small>🕐 {format_datetime(post['created_at'])}</small>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        # Display media if exists
+                        if post['image_path'] and os.path.exists(post['image_path']):
+                            st.image(post['image_path'], use_column_width=True)
+                        
+                        if post['video_path'] and os.path.exists(post['video_path']):
+                            st.video(post['video_path'])
+                        
+                        st.markdown("---")
+        
+        # Create Post Tab
+        with tab2:
+            st.subheader("Create New Post")
+            
+            with st.form("post_form"):
+                # Auto-fill farmer name from logged in user
+                farmer_name = st.text_input("Your Name", value=user['farmer_name'])
+                content = st.text_area(
+                    "Share your experience or question", 
+                    placeholder="Share farming tips, ask questions, or post updates..."
+                )
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    image_file = st.file_uploader(
+                        "Attach Photo (Optional)", 
+                        type=['jpg', 'jpeg', 'png']
+                    )
+                with col2:
+                    video_file = st.file_uploader(
+                        "Attach Video (Optional)", 
+                        type=['mp4'],
+                        help="Max 200MB"
+                    )
+                
+                submitted = st.form_submit_button("Post to Community", type="primary")
+                
+                if submitted:
+                    if not content:
+                        st.error("Please enter content!")
+                    else:
+                        # Validate and save files
+                        image_path = None
+                        video_path = None
+                        
+                        if image_file:
+                            is_valid, msg = validate_image(image_file)
+                            if not is_valid:
+                                st.error(f"Image error: {msg}")
+                                st.stop()
+                            image_path = save_uploaded_file(image_file, IMAGES_DIR)
+                        
+                        if video_file:
+                            is_valid, msg = validate_video(video_file)
+                            if not is_valid:
+                                st.error(f"Video error: {msg}")
+                                st.stop()
+                            video_path = save_uploaded_file(video_file, VIDEOS_DIR)
+                        
+                        # Save post
+                        post_id = create_post(farmer_name, content, image_path, video_path)
+                        st.success("Post created successfully!")
+                        st.balloons()
+                        st.rerun()
+                        
+    
+    # =============================================================================
     # GOVERNMENT SCHEMES
     # =============================================================================
     elif page == "🏛️ Government Schemes":
