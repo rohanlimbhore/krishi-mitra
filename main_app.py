@@ -280,74 +280,164 @@ def run_main_app(user):
         5. **Browse products** from organic farmers near you
         """)
     
-    # =============================================================================
-    # AI FARMING ASSISTANT
-    # =============================================================================
-    elif page == "💬 AI Farming Assistant":
-        st.header("💬 AI Farming Assistant")
-        st.markdown("Ask any farming-related question. I will respond in your language automatically!")
-        
-        # Initialize chat history
-        if "chat_history" not in st.session_state:
-            st.session_state.chat_history = []
-        
-        # Display chat history
-        for message in st.session_state.chat_history:
-            with st.chat_message(message["role"]):
-                st.write(message["content"])
-                if "language" in message:
-                    st.caption(f"Detected: {get_language_name(message['language'])}")
-        
-        # Chat input
-        user_query = st.chat_input("Type your farming question here...")
-        
-        if user_query:
-            # Add user message
-            st.session_state.chat_history.append({
-                "role": "user", 
-                "content": user_query
-            })
+# =============================================================================
+# VOICE AND AUDIO FUNCTIONS
+# =============================================================================
+
+def text_to_speech(text, lang_code='en'):
+    """
+    Convert text to speech using browser's built-in speech synthesis.
+    Returns HTML/JavaScript code.
+    """
+    # Map language codes to speech synthesis codes
+    lang_map = {
+        'en': 'en-IN',
+        'hi': 'hi-IN',
+        'mr': 'mr-IN',
+        'gu': 'gu-IN',
+        'ta': 'ta-IN',
+        'te': 'te-IN',
+        'kn': 'kn-IN'
+    }
+    
+    speech_lang = lang_map.get(lang_code, 'en-IN')
+    
+    # Clean text for JavaScript (remove quotes and newlines)
+    clean_text = text.replace('"', "'").replace('\n', ' ').replace('\r', '')
+    # Limit text length for speech
+    if len(clean_text) > 500:
+        clean_text = clean_text[:500] + "... (text truncated for audio)"
+    
+    html_code = f"""
+    <script>
+    function speakText() {{
+        if ('speechSynthesis' in window) {{
+            // Cancel any ongoing speech
+            window.speechSynthesis.cancel();
             
-            with st.chat_message("user"):
-                st.write(user_query)
+            var text = "{clean_text}";
+            var utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = '{speech_lang}';
+            utterance.rate = 0.9;  // Slightly slower for clarity
+            utterance.pitch = 1;
             
-            # Detect language and get response
-            with st.spinner("🤖 Thinking..."):
-                detected_lang = ai_service.detect_language(user_query)
-                response = ai_service.get_farming_response(user_query, detected_lang)
+            // Try to find appropriate voice
+            var voices = window.speechSynthesis.getVoices();
+            var selectedVoice = voices.find(voice => voice.lang.includes('{speech_lang.split("-")[0]}'));
+            if (selectedVoice) {{
+                utterance.voice = selectedVoice;
+            }}
             
-            # Add assistant message
-            st.session_state.chat_history.append({
-                "role": "assistant", 
-                "content": response,
-                "language": detected_lang
-            })
+            window.speechSynthesis.speak(utterance);
+        }} else {{
+            alert("Sorry, your browser doesn't support text-to-speech!");
+        }}
+    }}
+    
+    // Auto-speak after a short delay
+    setTimeout(speakText, 1000);
+    </script>
+    
+    <button onclick="speakText()" style="
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 10px;
+    ">
+        🔊 Listen Again
+    </button>
+    """
+    
+    return html_code
+
+def voice_input_button(key="voice_input"):
+    """
+    Create a voice input button using Web Speech API.
+    """
+    html_code = """
+    <script>
+    function startVoiceInput() {
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            var recognition = new SpeechRecognition();
             
-            with st.chat_message("assistant"):
-                st.write(response)
-                st.caption(f"Detected: {get_language_name(detected_lang)}")
-        
-        # Quick question buttons
-        st.markdown("---")
-        st.subheader("💡 Quick Questions")
-        
-        quick_questions = [
-            "How to control aphids in cotton?",
-            "Best fertilizer for paddy rice",
-            "Organic pest control methods",
-            "Water management in wheat",
-            "Government subsidy for drip irrigation"
-        ]
-        
-        cols = st.columns(len(quick_questions))
-        for idx, question in enumerate(quick_questions):
-            with cols[idx]:
-                if st.button(question, key=f"quick_{idx}"):
-                    st.session_state.chat_history.append({
-                        "role": "user", 
-                        "content": question
-                    })
-                    st.rerun()
+            recognition.lang = document.getElementById('selectedLang')?.value || 'en-IN';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            
+            recognition.onstart = function() {
+                document.getElementById('voiceStatus').innerHTML = '🎤 Listening... Speak now';
+                document.getElementById('voiceStatus').style.color = 'red';
+            };
+            
+            recognition.onresult = function(event) {
+                var transcript = event.results[0][0].transcript;
+                document.getElementById('voiceInputResult').value = transcript;
+                document.getElementById('voiceStatus').innerHTML = '✅ Voice captured! Click Send';
+                document.getElementById('voiceStatus').style.color = 'green';
+                
+                // Trigger Streamlit to update
+                var event = new Event('input', { bubbles: true });
+                document.getElementById('voiceInputResult').dispatchEvent(event);
+            };
+            
+            recognition.onerror = function(event) {
+                document.getElementById('voiceStatus').innerHTML = '❌ Error: ' + event.error;
+                document.getElementById('voiceStatus').style.color = 'red';
+            };
+            
+            recognition.onend = function() {
+                if (document.getElementById('voiceStatus').innerHTML.includes('Listening')) {
+                    document.getElementById('voiceStatus').innerHTML = '⏹️ Stopped listening';
+                    document.getElementById('voiceStatus').style.color = 'gray';
+                }
+            };
+            
+            recognition.start();
+        } else {
+            alert('Sorry, voice input is not supported in your browser. Please use Chrome or Edge.');
+        }
+    }
+    </script>
+    
+    <input type="hidden" id="selectedLang" value="">
+    
+    <button onclick="startVoiceInput()" style="
+        background-color: #FF9800;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-right: 10px;
+    ">
+        🎤 Speak
+    </button>
+    
+    <span id="voiceStatus" style="font-weight: bold;">Click mic to speak</span>
+    
+    <input type="text" id="voiceInputResult" style="display:none;">
+    """
+    
+    return html_code
+
+def get_language_code_from_name(lang_name):
+    """Convert full language name to code."""
+    lang_map = {
+        'English': 'en',
+        'Hindi': 'hi',
+        'Marathi': 'mr',
+        'Gujarati': 'gu',
+        'Tamil': 'ta',
+        'Telugu': 'te',
+        'Kannada': 'kn'
+    }
+    return lang_map.get(lang_name, 'en')
     
     # =============================================================================
     # CROP DIAGNOSIS
@@ -411,6 +501,11 @@ def run_main_app(user):
                         st.markdown("---")
                         st.subheader("📋 Analysis Report")
                         st.markdown(analysis)
+                        
+                        st.markdown("---")
+                        st.subheader("🔊 Listen to Analysis")
+                        st.markdown(text_to_speech(analysis, context_lang), unsafe_allow_html=True)
+                        
                     else:
                         st.error("Failed to process image")
     
