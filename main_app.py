@@ -29,145 +29,50 @@ os.makedirs(VIDEOS_DIR, exist_ok=True)
 
 def text_to_speech(text, lang_code='en'):
     """
-    Convert text to speech using browser's built-in speech synthesis.
-    Returns HTML/JavaScript code.
+    Simple text-to-speech using HTML5 audio.
     """
-    # Map language codes to speech synthesis codes
+    # Map language codes
     lang_map = {
-        'en': 'en-IN',
-        'hi': 'hi-IN',
-        'mr': 'mr-IN',
-        'gu': 'gu-IN',
-        'ta': 'ta-IN',
-        'te': 'te-IN',
-        'kn': 'kn-IN'
+        'en': 'en-IN', 'hi': 'hi-IN', 'mr': 'mr-IN',
+        'gu': 'gu-IN', 'ta': 'ta-IN', 'te': 'te-IN', 'kn': 'kn-IN'
     }
-    
     speech_lang = lang_map.get(lang_code, 'en-IN')
     
-    # Clean text for JavaScript (remove quotes and newlines)
-    clean_text = text.replace('"', "'").replace('\n', ' ').replace('\r', '')
-    # Limit text length for speech
-    if len(clean_text) > 500:
-        clean_text = clean_text[:500] + "... (text truncated for audio)"
+    # Clean text
+    clean_text = text.replace('"', "'").replace('\n', ' ')[:400]
+    
+    # Use Google Translate TTS (free, no API key needed)
+    import urllib.parse
+    encoded_text = urllib.parse.quote(clean_text)
+    
+    audio_url = f"https://translate.google.com/translate_tts?ie=UTF-8&q={encoded_text}&tl={speech_lang}&client=tw-ob"
     
     html_code = f"""
-    <script>
-    function speakText() {{
-        if ('speechSynthesis' in window) {{
-            // Cancel any ongoing speech
-            window.speechSynthesis.cancel();
-            
-            var text = "{clean_text}";
-            var utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = '{speech_lang}';
-            utterance.rate = 0.9;  // Slightly slower for clarity
-            utterance.pitch = 1;
-            
-            // Try to find appropriate voice
-            var voices = window.speechSynthesis.getVoices();
-            var selectedVoice = voices.find(voice => voice.lang.includes('{speech_lang.split("-")[0]}'));
-            if (selectedVoice) {{
-                utterance.voice = selectedVoice;
-            }}
-            
-            window.speechSynthesis.speak(utterance);
-        }} else {{
-            alert("Sorry, your browser doesn't support text-to-speech!");
-        }}
-    }}
-    
-    // Auto-speak after a short delay
-    setTimeout(speakText, 1000);
-    </script>
-    
-    <button onclick="speakText()" style="
-        background-color: #4CAF50;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-        margin-top: 10px;
-    ">
-        🔊 Listen Again
-    </button>
+    <audio controls autoplay style="width:100%; margin-top:10px;">
+        <source src="{audio_url}" type="audio/mpeg">
+        Your browser does not support audio.
+    </audio>
+    <p style="font-size:12px; color:gray;">🔊 Auto-playing in {speech_lang}</p>
     """
     
     return html_code
 
-def voice_input_button(key="voice_input"):
+def voice_input_widget():
     """
-    Create a voice input button using Web Speech API.
+    Simple voice input using Streamlit's native audio recorder.
     """
-    html_code = """
-    <script>
-    function startVoiceInput() {
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            var recognition = new SpeechRecognition();
-            
-            recognition.lang = document.getElementById('selectedLang')?.value || 'en-IN';
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            
-            recognition.onstart = function() {
-                document.getElementById('voiceStatus').innerHTML = '🎤 Listening... Speak now';
-                document.getElementById('voiceStatus').style.color = 'red';
-            };
-            
-            recognition.onresult = function(event) {
-                var transcript = event.results[0][0].transcript;
-                document.getElementById('voiceInputResult').value = transcript;
-                document.getElementById('voiceStatus').innerHTML = '✅ Voice captured! Click Send';
-                document.getElementById('voiceStatus').style.color = 'green';
-                
-                // Trigger Streamlit to update
-                var event = new Event('input', { bubbles: true });
-                document.getElementById('voiceInputResult').dispatchEvent(event);
-            };
-            
-            recognition.onerror = function(event) {
-                document.getElementById('voiceStatus').innerHTML = '❌ Error: ' + event.error;
-                document.getElementById('voiceStatus').style.color = 'red';
-            };
-            
-            recognition.onend = function() {
-                if (document.getElementById('voiceStatus').innerHTML.includes('Listening')) {
-                    document.getElementById('voiceStatus').innerHTML = '⏹️ Stopped listening';
-                    document.getElementById('voiceStatus').style.color = 'gray';
-                }
-            };
-            
-            recognition.start();
-        } else {
-            alert('Sorry, voice input is not supported in your browser. Please use Chrome or Edge.');
-        }
-    }
-    </script>
+    st.markdown("### 🎤 Voice Input")
+    st.info("Click 'Browse files' to upload audio or type your question below")
     
-    <input type="hidden" id="selectedLang" value="">
+    # Allow audio file upload as voice input
+    audio_file = st.file_uploader("Upload voice recording (optional)", type=['wav', 'mp3', 'ogg'])
     
-    <button onclick="startVoiceInput()" style="
-        background-color: #FF9800;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-        margin-right: 10px;
-    ">
-        🎤 Speak
-    </button>
+    if audio_file:
+        st.audio(audio_file)
+        st.warning("⚠️ Voice-to-text processing would require additional API. Please type your question for now.")
     
-    <span id="voiceStatus" style="font-weight: bold;">Click mic to speak</span>
+    return None
     
-    <input type="text" id="voiceInputResult" style="display:none;">
-    """
-    
-    return html_code
 
 def run_main_app(user):
     """Run main application with all features."""
@@ -266,8 +171,7 @@ def run_main_app(user):
         4. **Share posts** with images and videos (MP4, max 200MB)
         5. **Browse products** from organic farmers near you
         """)
-    
-    # =============================================================================
+        # =============================================================================
     # AI FARMING ASSISTANT WITH VOICE
     # =============================================================================
     elif page == "💬 AI Farming Assistant":
@@ -278,53 +182,27 @@ def run_main_app(user):
         lang_name = get_language_name(selected_lang)
         
         st.markdown(f"🌐 Current Language: **{lang_name}**")
-        st.markdown("Ask any farming-related question. You can **type or speak**!")
-        
-        # Voice input section
-        st.markdown("### 🎤 Voice Input")
-        voice_col1, voice_col2 = st.columns([1, 3])
-        
-        with voice_col1:
-            st.markdown(voice_input_button(), unsafe_allow_html=True)
-        
-        with voice_col2:
-            # Hidden text input that will be filled by voice
-            voice_text = st.text_input(
-                "Voice input (hidden)", 
-                key="voice_input_field",
-                label_visibility="collapsed"
-            )
-        
-        st.markdown("---")
         
         # Initialize chat history
         if "chat_history" not in st.session_state:
             st.session_state.chat_history = []
         
-        # Display chat history with voice buttons
+        # Display chat history with listen buttons
         for idx, message in enumerate(st.session_state.chat_history):
             with st.chat_message(message["role"]):
                 st.write(message["content"])
                 
-                # Add voice button for assistant messages
+                # Add listen button for assistant messages
                 if message["role"] == "assistant":
-                    # Create unique key for each message
-                    voice_key = f"voice_{idx}_{hash(message['content']) % 10000}"
-                    st.markdown(
-                        text_to_speech(message["content"], selected_lang), 
-                        unsafe_allow_html=True
-                    )
+                    listen_key = f"listen_{idx}"
+                    if st.button("🔊 Listen", key=listen_key):
+                        st.markdown(text_to_speech(message["content"], selected_lang), unsafe_allow_html=True)
                 
                 if "language" in message:
                     st.caption(f"Language: {get_language_name(message['language'])}")
         
         # Text input
         user_query = st.chat_input("Type your farming question here...")
-        
-        # Use voice input if available
-        if voice_text and voice_text != st.session_state.get('last_voice_text', ''):
-            user_query = voice_text
-            st.session_state.last_voice_text = voice_text
         
         if user_query:
             # Add user message
@@ -336,9 +214,8 @@ def run_main_app(user):
             with st.chat_message("user"):
                 st.write(user_query)
             
-            # Get response with selected language
+            # Get response
             with st.spinner("🤖 Thinking..."):
-                # Override auto-detection with selected language
                 response = ai_service.get_farming_response(user_query, selected_lang)
             
             # Add assistant message
@@ -350,29 +227,23 @@ def run_main_app(user):
             
             with st.chat_message("assistant"):
                 st.write(response)
-                # Auto-play voice
-                st.markdown(text_to_speech(response, selected_lang), unsafe_allow_html=True)
+                # Add listen button
+                if st.button("🔊 Listen to Answer", key=f"listen_new_{len(st.session_state.chat_history)}"):
+                    st.markdown(text_to_speech(response, selected_lang), unsafe_allow_html=True)
                 st.caption(f"Language: {get_language_name(selected_lang)}")
         
-        # Quick question buttons
+        # Quick questions
         st.markdown("---")
         st.subheader("💡 Quick Questions")
         
         quick_questions = {
-            'en': ["How to control aphids in cotton?", "Best fertilizer for paddy rice", 
-                   "Organic pest control methods", "Water management in wheat"],
-            'hi': ["कपास में एफिड्स को कैसे नियंत्रित करें?", "धान के लिए सर्वोत्तम उर्वरक",
-                   "जैविक कीट नियंत्रण विधियां", "गेहूं में जल प्रबंधन"],
-            'mr': ["कापसातील अ‍ॅफिड्स कसे नियंत्रित करावे?", "भातासाठी सर्वोत्तम खत",
-                   "सेंद्रिय कीटक नियंत्रण पद्धती", "गहूमध्ये पाणी व्यवस्थापन"],
-            'gu': ["કપાસમાં એફિડ્સને કેવી રીતે નિયંત્રિત કરવા?", "ધાન્ય માટે સર્વોપરિ ખાતર",
-                   "જૈવિક જીવાત નિયંત્રણ પદ્ધતિઓ", "ઘઉંમાં પાણીનું વ્યવસ્થાપન"],
-            'ta': ["பருத்தியில் அஃபிட்களை எவ்வாறு கட்டுப்படுத்துவது?", "நெல்லுக்கு சிறந்த உரம்",
-                   "உயிரியல் பூச்சி கட்டுப்பாட்டு முறைகள்", "கோதுமையில் நீர் மேலாண்மை"],
-            'te': ["పత్తిలో ఎఫిడ్లను ఎలా నియంత్రించాలి?", "వరికి ఉత్తమ ఎరువు",
-                   "సేంద్రీయ పురుగు నియంత్రణ పద్ధతులు", "గోధుమలో నీటి నిర్వహణ"],
-            'kn': ["ಹತ್ತಿಯಲ್ಲಿ ಎಫಿಡ್‌ಗಳನ್ನು ಹೇಗೆ ನಿಯಂತ್ರಿಸುವುದು?", "ಭತ್ತಕ್ಕೆ ಉತ್ತಮ ಗೊಬ್ಬರ",
-                   "ಸಾವಯವ ಕೀಟ ನಿಯಂತ್ರಣ ವಿಧಾನಗಳು", "ಗೋಧಿಯಲ್ಲಿ ನೀರಿನ ವ್ಯವಸ್ಥಾಪನೆ"]
+            'en': ["How to control aphids?", "Best fertilizer for rice", "Organic pest control", "Water management"],
+            'hi': ["एफिड्स को कैसे नियंत्रित करें?", "चावल के लिए उर्वरक", "जैविक कीट नियंत्रण", "जल प्रबंधन"],
+            'mr': ["अ‍ॅफिड्स कसे नियंत्रित करावे?", "भातासाठी खत", "सेंद्रिय कीटक नियंत्रण", "पाणी व्यवस्थापन"],
+            'gu': ["એફિડ્સને કેવી રીતે નિયંત્રિત કરવા?", "ધાન્ય માટે ખાતર", "જૈવિક જીવાત નિયંત્રણ", "પાણીનું વ્યવસ્થાપન"],
+            'ta': ["அஃபிட்களை கட்டுப்படுத்துவது?", "நெல்லுக்கு உரம்", "உயிரியல் பூச்சி கட்டுப்பாடு", "நீர் மேலாண்மை"],
+            'te': ["ఎఫిడ్లను నియంత్రించడం?", "వరికి ఎరువు", "సేంద్రీయ పురుగు నియంత్రణ", "నీటి నిర్వహణ"],
+            'kn': ["ಎಫಿಡ್‌ಗಳನ್ನು ನಿಯಂತ್ರಿಸುವುದು?", "ಭತ್ತಕ್ಕೆ ಗೊಬ್ಬರ", "ಸಾವಯವ ಕೀಟ ನಿಯಂತ್ರಣ", "ನೀರಿನ ವ್ಯವಸ್ಥಾಪನೆ"]
         }
         
         questions = quick_questions.get(selected_lang, quick_questions['en'])
@@ -380,12 +251,13 @@ def run_main_app(user):
         cols = st.columns(len(questions))
         for idx, question in enumerate(questions):
             with cols[idx]:
-                if st.button(question[:20] + "...", key=f"quick_{idx}"):
+                if st.button(question[:15] + "...", key=f"quick_{idx}"):
                     st.session_state.chat_history.append({
                         "role": "user", 
                         "content": question
                     })
                     st.rerun()
+                    
     
     # =============================================================================
     # CROP DIAGNOSIS
@@ -448,10 +320,12 @@ def run_main_app(user):
                         st.subheader("📋 Analysis Report")
                         st.markdown(analysis)
                         
-                        # Voice output
+                        
+                        # Voice output button
                         st.markdown("---")
-                        st.subheader("🔊 Listen to Analysis")
-                        st.markdown(text_to_speech(analysis, context_lang), unsafe_allow_html=True)
+                        if st.button("🔊 Listen to Analysis", key="listen_analysis"):
+                            st.markdown(text_to_speech(analysis, context_lang), unsafe_allow_html=True)
+                            
                     else:
                         st.error("Failed to process image")
     
