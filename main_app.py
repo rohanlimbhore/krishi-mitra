@@ -527,10 +527,7 @@ def run_main_app(user):
             with st.chat_message(message["role"]):
                 st.write(message["content"])
                 
-                # Add listen button for old messages (manual play for history)
-                if message["role"] == "assistant":
-                    if st.button(get_text('listen', selected_lang), key=f"listen_{idx}"):
-                        st.markdown(text_to_speech(message["content"], selected_lang, auto_play=False), unsafe_allow_html=True)
+                
         
         # Text input
         user_query = st.chat_input(get_text('type_here', selected_lang))
