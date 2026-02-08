@@ -373,9 +373,9 @@ def text_to_speech(text, lang_code='en', auto_play=False):
         // Auto-play if enabled
         {autoplay_js}
     </script>
-    
-    
-    return html_code
+"""
+
+return html_code
 
         
     
