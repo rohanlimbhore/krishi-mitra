@@ -617,7 +617,7 @@ def run_main_app(user):
                 "language": selected_lang
             })
             
-                with st.chat_message("assistant"):
+            with st.chat_message("assistant"):
                 st.write(response)
                 # Manual button - no auto-play (no lag)
                 st.markdown(text_to_speech(response, selected_lang, auto_play=False), unsafe_allow_html=True)
