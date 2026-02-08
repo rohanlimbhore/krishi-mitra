@@ -316,70 +316,6 @@ def get_text(key, lang='en'):
     return TRANSLATIONS.get(lang, TRANSLATIONS['en']).get(key, TRANSLATIONS['en'][key])
 
 # =============================================================================
-# VOICE FUNCTION (Simple Working Version)
-# =============================================================================
-
-def text_to_speech(text, lang_code='en', auto_play=False):
-    """
-    Lightweight text-to-speech using browser's built-in speech synthesis.
-    No external libraries needed - fast and no lag!
-    """
-    # Map language codes
-    lang_map = {
-        'en': 'en-IN', 'hi': 'hi-IN', 'mr': 'mr-IN',
-        'gu': 'gu-IN', 'ta': 'ta-IN', 'te': 'te-IN', 'kn': 'kn-IN'
-    }
-    speech_lang = lang_map.get(lang_code, 'en-IN')
-    
-    # Clean text
-    clean_text = text.replace('"', "'").replace('\n', ' ')[:300]
-    
-    # JavaScript for speech synthesis (built into browser)
-    autoplay_js = "window.speechSynthesis.speak(msg);" if auto_play else ""
-    
-    html_code = f"""
-    <div style="margin:10px 0;">
-        <button onclick="speakText()" style="
-            background-color:#4CAF50; 
-            color:white; 
-            padding:10px 20px; 
-            border:none; 
-            border-radius:5px; 
-            cursor:pointer;
-            font-size:16px;
-        ">
-            🔊 {get_text('listen', lang_code)}
-        </button>
-        <p style="font-size:11px; color:#666; margin-top:5px;">
-            Click button to listen in {speech_lang}
-        </p>
-    </div>
-    
-    <script>
-        function speakText() {{
-            if ('speechSynthesis' in window) {{
-                window.speechSynthesis.cancel();
-                var msg = new SpeechSynthesisUtterance("{clean_text}");
-                msg.lang = '{speech_lang}';
-                msg.rate = 0.9;
-                msg.pitch = 1;
-                window.speechSynthesis.speak(msg);
-            }} else {{
-                alert('Your browser does not support speech. Please use Chrome.');
-            }}
-        }}
-        
-        // Auto-play if enabled
-        {autoplay_js}
-    </script>
-    """
-    
-    return html_code
-    
-        
-    
-
-# =============================================================================
 # MAIN APP FUNCTION
 # =============================================================================
 
@@ -619,10 +555,7 @@ def run_main_app(user):
             
             with st.chat_message("assistant"):
                 st.write(response)
-                # Manual button - no auto-play (no lag)
-                st.markdown(text_to_speech(response, selected_lang, auto_play=False), unsafe_allow_html=True)
-                st.caption(f"Language: {get_language_name(selected_lang)}")
-                            
+                
         
     
     
@@ -676,9 +609,6 @@ def run_main_app(user):
                         st.markdown("---")
                         st.subheader(get_text('analysis_report', selected_lang))
                         st.markdown(analysis)
-                        
-                        # AUTO-PLAY voice after analysis
-                        st.markdown(text_to_speech(analysis, selected_lang, auto_play=True), unsafe_allow_html=True)
                         
                     else:
                         st.error("Failed to process image")
