@@ -442,7 +442,7 @@ def run_main_app(user):
         st.markdown(f"2. {get_text('feature_2', selected_lang)}")
         st.markdown(f"3. {get_text('feature_3', selected_lang)}")
         st.markdown(f"4. {get_text('feature_4', selected_lang)}")
-                st.markdown(f"5. {get_text('feature_5', selected_lang)}")
+        st.markdown(f"5. {get_text('feature_5', selected_lang)}")
         st.markdown(f"6. {get_text('feature_6', selected_lang)}")
         
         # Feature cards
