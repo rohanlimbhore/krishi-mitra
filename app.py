@@ -46,7 +46,7 @@ def hash_password(password):
 def register_user(mobile_email, password, farmer_name, location):
     """Register new user."""
     try:
-        conn = sqlite3.connect(DB_PATH, check_safe_thread=False)
+        conn = sqlite3.connect(DB_PATH, check_same_thread=False)
         cursor = conn.cursor()
         
         password_hash = hash_password(password)
