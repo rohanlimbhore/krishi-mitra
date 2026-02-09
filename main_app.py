@@ -424,7 +424,33 @@ def run_main_app(user):
         options=page_options
     )
     
+        # Language selector in sidebar
+    st.sidebar.markdown(f"### 🌐 {get_text('language', selected_lang)}")
+    lang_options = {
+        'en': 'English',
+        'mr': 'मराठी (Marathi)',
+        'hi': 'हिन्दी (Hindi)',
+        'gu': 'ગુજરાતી (Gujarati)',
+        'ta': 'தமிழ் (Tamil)',
+        'te': 'తెలుగు (Telugu)',
+        'kn': 'ಕನ್ನಡ (Kannada)'
+    }
+    
+    selected_lang_key = st.sidebar.selectbox(
+        "Select Language / भाषा चुनें",
+        options=list(lang_options.keys()),
+        format_func=lambda x: lang_options[x],
+        index=list(lang_options.keys()).index(selected_lang),
+        key='language_selector'
+    )
+    
+    # Update session state if language changed
+    if selected_lang_key != selected_lang:
+        st.session_state['selected_language'] = selected_lang_key
+        st.rerun()
+    
     st.sidebar.markdown("---")
+    
     
     # =============================================================================
     # HOME PAGE
