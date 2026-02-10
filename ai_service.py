@@ -1,9 +1,8 @@
 """
 Google Gemini AI Service for Krishi Mitra
-Uses new google-genai library
 """
 
-from google import genai
+import google.generativeai as genai
 from PIL import Image
 import streamlit as st
 from config import get_gemini_api_key
@@ -11,15 +10,17 @@ from config import get_gemini_api_key
 class KrishiAI:
     def __init__(self):
         api_key = get_gemini_api_key()
-        self.client = genai.Client(api_key=api_key)
+        genai.configure(api_key=api_key)
         
-        # Use only stable, working model names with models/ prefix
+        # Try multiple models in order
         self.models_to_try = [
-            'models/gemini-1.5-flash-latest',
-            'models/gemini-1.5-flash',
-            'models/gemini-1.5-pro-latest'
+            'models/gemini-2.0-flash-lite',
+            'models/gemini-flash-latest',
+            'models/gemini-2.0-flash-lite-001',
+            'models/gemini-2.5-flash-lite'
         ]
         self.current_model_index = 0
+        self.model = genai.GenerativeModel(self.models_to_try[0])
     
     def _try_generate(self, prompt, image=None):
         """Try generating with fallback models."""
@@ -28,30 +29,25 @@ class KrishiAI:
         for attempt in range(max_attempts):
             try:
                 model_name = self.models_to_try[self.current_model_index]
+                model = genai.GenerativeModel(model_name)
                 
-                # Create content
                 if image:
-                    contents = [prompt, image]
+                    response = model.generate_content([prompt, image])
                 else:
-                    contents = prompt
-                
-                # Generate response
-                response = self.client.models.generate_content(
-                    model=model_name,
-                    contents=contents
-                )
+                    response = model.generate_content(prompt)
                 
                 return response.text
                 
             except Exception as e:
                 error_str = str(e)
-                # If any error (quota, 404, etc.), try next model
-                self.current_model_index = (self.current_model_index + 1) % len(self.models_to_try)
-                if attempt == max_attempts - 1:
+                if "429" in error_str or "quota" in error_str.lower():
+                    # Try next model
+                    self.current_model_index = (self.current_model_index + 1) % len(self.models_to_try)
+                    continue
+                else:
                     return f"Error: {error_str}"
-                continue
         
-        return "Error: All models failed. Please try again later."
+        return "Error: All models exceeded quota. Please try after 24 hours or use a different API key."
     
     def detect_language(self, text):
         """Detect language of input text."""
