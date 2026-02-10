@@ -1,10 +1,9 @@
 """
 Google Gemini AI Service for Krishi Mitra
-Uses new google-genai library (not deprecated google.generativeai)
+Uses new google-genai library
 """
 
 from google import genai
-from google.genai import types
 from PIL import Image
 import streamlit as st
 from config import get_gemini_api_key
@@ -12,16 +11,13 @@ from config import get_gemini_api_key
 class KrishiAI:
     def __init__(self):
         api_key = get_gemini_api_key()
-        # New client-based initialization
         self.client = genai.Client(api_key=api_key)
         
-        # CORRECTED: Added 'models/' prefix for new google-genai API
+        # Use only stable, working model names with models/ prefix
         self.models_to_try = [
-            'models/gemini-1.5-flash-001',
-            'models/gemini-1.5-flash-002',
             'models/gemini-1.5-flash-latest',
-            'models/gemini-2.0-flash-lite',
-            'models/gemini-2.0-flash-exp'
+            'models/gemini-1.5-flash',
+            'models/gemini-1.5-pro-latest'
         ]
         self.current_model_index = 0
     
@@ -33,31 +29,29 @@ class KrishiAI:
             try:
                 model_name = self.models_to_try[self.current_model_index]
                 
-                # New API format
+                # Create content
                 if image:
-                    # For image analysis, use generate_content with both text and image
-                    response = self.client.models.generate_content(
-                        model=model_name,
-                        contents=[prompt, image]
-                    )
+                    contents = [prompt, image]
                 else:
-                    response = self.client.models.generate_content(
-                        model=model_name,
-                        contents=prompt
-                    )
+                    contents = prompt
+                
+                # Generate response
+                response = self.client.models.generate_content(
+                    model=model_name,
+                    contents=contents
+                )
                 
                 return response.text
                 
             except Exception as e:
                 error_str = str(e)
-                if "429" in error_str or "quota" in error_str.lower() or "exhausted" in error_str.lower() or "404" in error_str:
-                    # Try next model
-                    self.current_model_index = (self.current_model_index + 1) % len(self.models_to_try)
-                    continue
-                else:
+                # If any error (quota, 404, etc.), try next model
+                self.current_model_index = (self.current_model_index + 1) % len(self.models_to_try)
+                if attempt == max_attempts - 1:
                     return f"Error: {error_str}"
+                continue
         
-        return "Error: All models exceeded quota or not found. Please try after 24 hours or use a different API key."
+        return "Error: All models failed. Please try again later."
     
     def detect_language(self, text):
         """Detect language of input text."""
@@ -171,4 +165,4 @@ class KrishiAI:
 @st.cache_resource
 def get_ai_service():
     return KrishiAI()
-            
+        
