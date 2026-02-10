@@ -10,19 +10,20 @@ import streamlit as st
 from config import get_gemini_api_key
 
 class KrishiAI:
-        def __init__(self):
-                api_key = get_gemini_api_key()
-                self.client = genai.Client(api_key=api_key)
+    def __init__(self):
+        api_key = get_gemini_api_key()
+        # New client-based initialization
+        self.client = genai.Client(api_key=api_key)
         
-        # CORRECTED: Add 'models/' prefix for new API
+        # CORRECTED: Added 'models/' prefix for new google-genai API
         self.models_to_try = [
+            'models/gemini-1.5-flash-001',
+            'models/gemini-1.5-flash-002',
+            'models/gemini-1.5-flash-latest',
             'models/gemini-2.0-flash-lite',
-            'models/gemini-2.0-flash',
-            'models/gemini-1.5-flash',
-            'models/gemini-1.5-flash-latest'
+            'models/gemini-2.0-flash-exp'
         ]
         self.current_model_index = 0
-    
     
     def _try_generate(self, prompt, image=None):
         """Try generating with fallback models."""
@@ -49,14 +50,14 @@ class KrishiAI:
                 
             except Exception as e:
                 error_str = str(e)
-                if "429" in error_str or "quota" in error_str.lower() or "exhausted" in error_str.lower():
+                if "429" in error_str or "quota" in error_str.lower() or "exhausted" in error_str.lower() or "404" in error_str:
                     # Try next model
                     self.current_model_index = (self.current_model_index + 1) % len(self.models_to_try)
                     continue
                 else:
                     return f"Error: {error_str}"
         
-        return "Error: All models exceeded quota. Please try after 24 hours or use a different API key."
+        return "Error: All models exceeded quota or not found. Please try after 24 hours or use a different API key."
     
     def detect_language(self, text):
         """Detect language of input text."""
@@ -170,4 +171,4 @@ class KrishiAI:
 @st.cache_resource
 def get_ai_service():
     return KrishiAI()
-        
+            
