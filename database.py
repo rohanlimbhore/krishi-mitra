@@ -238,7 +238,151 @@ def search_products(search_term):
     conn.close()
     
     return [dict(product) for product in products]
+def register_user(farmer_name, mobile_email, location, password_hash=None):
+    """Register a new farmer."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        if DB_TYPE == "postgresql":
+            cursor.execute('''
+                INSERT INTO users (farmer_name, mobile_email, location, password_hash)
+                VALUES (%s, %s, %s, %s)
+                ON CONFLICT (mobile_email) DO NOTHING
+            ''', (farmer_name, mobile_email, location, password_hash))
+        else:
+            cursor.execute('''
+                INSERT OR IGNORE INTO users (farmer_name, mobile_email, location, password_hash)
+                VALUES (?, ?, ?, ?)
+            ''', (farmer_name, mobile_email, location, password_hash))
+        
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Error registering user: {e}")
+        return False
+    finally:
+        conn.close()
+
+def record_login(mobile_email, ip_address=None, device_info=None):
+    """Record user login."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Update last_login in users table
+        if DB_TYPE == "postgresql":
+            cursor.execute('''
+                UPDATE users SET last_login = CURRENT_TIMESTAMP 
+                WHERE mobile_email = %s
+            ''', (mobile_email,))
+            
+            # Get user_id
+            cursor.execute('SELECT id FROM users WHERE mobile_email = %s', (mobile_email,))
+            user = cursor.fetchone()
+            
+            if user:
+                # Add to login_history
+                cursor.execute('''
+                    INSERT INTO login_history (user_id, ip_address, device_info)
+                    VALUES (%s, %s, %s)
+                ''', (user[0], ip_address, device_info))
+        else:
+            cursor.execute('''
+                UPDATE users SET last_login = CURRENT_TIMESTAMP 
+                WHERE mobile_email = ?
+            ''', (mobile_email,))
+            
+            cursor.execute('SELECT id FROM users WHERE mobile_email = ?', (mobile_email,))
+            user = cursor.fetchone()
+            
+            if user:
+                cursor.execute('''
+                    INSERT INTO login_history (user_id, ip_address, device_info)
+                    VALUES (?, ?, ?)
+                ''', (user[0], ip_address, device_info))
+        
+        conn.commit()
+    except Exception as e:
+        print(f"Error recording login: {e}")
+    finally:
+        conn.close()
+
+def get_all_users():
+    """Get all registered users."""
+    conn = get_db_connection()
+    
+    if DB_TYPE == "postgresql":
+        from psycopg2.extras import RealDictCursor
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+    else:
+        cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT id, farmer_name, mobile_email, location, created_at, last_login 
+        FROM users 
+        ORDER BY created_at DESC
+    ''')
+    
+    users = cursor.fetchall()
+    conn.close()
+    
+    return [dict(user) for user in users]
+
+def get_login_history(limit=100):
+    """Get login history with user details."""
+    conn = get_db_connection()
+    
+    if DB_TYPE == "postgresql":
+        from psycopg2.extras import RealDictCursor
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute('''
+            SELECT lh.id, u.farmer_name, u.mobile_email, lh.login_time, lh.ip_address
+            FROM login_history lh
+            JOIN users u ON lh.user_id = u.id
+            ORDER BY lh.login_time DESC
+            LIMIT %s
+        ''', (limit,))
+    else:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT lh.id, u.farmer_name, u.mobile_email, lh.login_time, lh.ip_address
+            FROM login_history lh
+            JOIN users u ON lh.user_id = u.id
+            ORDER BY lh.login_time DESC
+            LIMIT ?
+        ''', (limit,))
+    
+    history = cursor.fetchall()
+    conn.close()
+    
+    return [dict(h) for h in history]
+            
 
 # Initialize database on import
 init_database()
+    # Users Table - Track registered farmers
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            farmer_name TEXT NOT NULL,
+            mobile_email TEXT UNIQUE NOT NULL,
+            location TEXT,
+            password_hash TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            last_login TIMESTAMP
+        )
+    ''')
+    
+    # Login History Table - Track every login
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS login_history (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER REFERENCES users(id),
+            login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            ip_address TEXT,
+            device_info TEXT
+        )
+    ''')
+
               
