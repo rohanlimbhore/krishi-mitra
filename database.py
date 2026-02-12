@@ -13,7 +13,12 @@ def get_db_connection():
         import psycopg2
         from psycopg2.extras import RealDictCursor
         
-        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        # Fix: Use connect_timeout and options to force IPv4
+        conn = psycopg2.connect(
+            DATABASE_URL, 
+            sslmode='require',
+            connect_timeout=10
+        )
         return conn
     else:
         # SQLite fallback
@@ -21,6 +26,8 @@ def get_db_connection():
         conn = sqlite3.connect(DB_PATH, check_same_thread=False)
         conn.row_factory = sqlite3.Row
         return conn
+        
+
 
 def init_database():
     """Initialize database tables."""
