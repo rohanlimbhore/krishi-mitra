@@ -451,18 +451,16 @@ def run_main_app(user):
     
         st.sidebar.markdown("---")
     if st.sidebar.checkbox("👥 View Users"):
-    st.sidebar.markdown("---")
-    
-    users = get_all_users()
-    st.sidebar.write(f"**Total Users:** {len(users)}")
-    
-    for user in users:
-        with st.sidebar.expander(f"👤 {user['farmer_name']}"):
-            st.write(f"📱 {user['mobile_email']}")
-            st.write(f"📍 {user['location']}")
-            st.write(f"🕐 Joined: {user['created_at']}")
-            if user['last_login']:
-                st.write(f"🔓 Last Login: {user['last_login']}")
+        st.sidebar.markdown("---")
+        users = get_all_users()
+        st.sidebar.write(f"**Total Users:** {len(users)}")
+        for user in users:
+            with st.sidebar.expander(f"👤 {user['farmer_name']}"):
+                st.write(f"📱 {user['mobile_email']}")
+                st.write(f"📍 {user['location']}")
+                st.write(f"🕐 Joined: {user['created_at']}")
+                if user['last_login']:
+                    st.write(f"🔓 Last Login: {user['last_login']}")
                 
     
     # =============================================================================
