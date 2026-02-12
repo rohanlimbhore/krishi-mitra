@@ -450,6 +450,30 @@ def run_main_app(user):
         st.rerun()
     
     st.sidebar.markdown("---")
+    # Add this in sidebar navigation
+    if st.sidebar.checkbox("🔐 Admin View"):
+    st.sidebar.markdown("---")
+    st.sidebar.subheader("Database Data")
+    
+    tab1, tab2 = st.tabs(["Posts", "Products"])
+    
+    with tab1:
+        posts = get_all_posts(limit=100)
+        st.write(f"Total Posts: {len(posts)}")
+        for post in posts:
+            with st.expander(f"Post by {post['farmer_name']}"):
+                st.write(post['content'])
+                st.caption(f"Time: {post['created_at']}")
+    
+    with tab2:
+        products = get_all_products(limit=100)
+        st.write(f"Total Products: {len(products)}")
+        for prod in products:
+            with st.expander(f"{prod['product_name']} by {prod['farmer_name']}"):
+                st.write(f"Quantity: {prod['quantity']}")
+                st.write(f"Location: {prod['location']}")
+                st.write(f"Phone: {prod['phone_number']}")
+                
     
     
     # =============================================================================
