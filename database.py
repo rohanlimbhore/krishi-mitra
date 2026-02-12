@@ -1,6 +1,7 @@
 """
 Database operations for Krishi Mitra
 Supports both SQLite (local) and PostgreSQL (Supabase)
+Includes User Management and Login History
 """
 
 import os
@@ -13,12 +14,7 @@ def get_db_connection():
         import psycopg2
         from psycopg2.extras import RealDictCursor
         
-        # Fix: Use connect_timeout and options to force IPv4
-        conn = psycopg2.connect(
-            DATABASE_URL, 
-            sslmode='require',
-            connect_timeout=10
-        )
+        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         return conn
     else:
         # SQLite fallback
@@ -26,8 +22,6 @@ def get_db_connection():
         conn = sqlite3.connect(DB_PATH, check_same_thread=False)
         conn.row_factory = sqlite3.Row
         return conn
-        
-
 
 def init_database():
     """Initialize database tables."""
@@ -35,7 +29,9 @@ def init_database():
     cursor = conn.cursor()
     
     if DB_TYPE == "postgresql":
-        # PostgreSQL syntax
+        # --- PostgreSQL Tables ---
+        
+        # Original Tables
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS community_posts (
                 id SERIAL PRIMARY KEY,
@@ -69,8 +65,35 @@ def init_database():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
+
+        # NEW: Users Table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                farmer_name TEXT NOT NULL,
+                mobile_email TEXT UNIQUE NOT NULL,
+                location TEXT,
+                password_hash TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_login TIMESTAMP
+            )
+        ''')
+        
+        # NEW: Login History Table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS login_history (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id),
+                login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                ip_address TEXT,
+                device_info TEXT
+            )
+        ''')
+
     else:
-        # SQLite syntax
+        # --- SQLite Tables ---
+        
+        # Original Tables
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS community_posts (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -102,11 +125,37 @@ def init_database():
                 content TEXT,
                 language TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+
+        # NEW: Users Table (Adapted for SQLite syntax)
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                farmer_name TEXT NOT NULL,
+                mobile_email TEXT UNIQUE NOT NULL,
+                location TEXT,
+                password_hash TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_login TIMESTAMP
+            )
+        ''')
+        
+        # NEW: Login History Table (Adapted for SQLite syntax)
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS login_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER REFERENCES users(id),
+                login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                ip_address TEXT,
+                device_info TEXT
             )
         ''')
     
     conn.commit()
     conn.close()
+
+# --- Original Functions ---
 
 def create_post(farmer_name, content, image_path=None, video_path=None):
     """Create a new community post."""
@@ -215,7 +264,6 @@ def get_all_products(limit=100):
 def search_products(search_term):
     """Search products by name or location."""
     conn = get_db_connection()
-    
     search_pattern = f'%{search_term}%'
     
     if DB_TYPE == "postgresql":
@@ -238,6 +286,9 @@ def search_products(search_term):
     conn.close()
     
     return [dict(product) for product in products]
+
+# --- NEW User Management Functions ---
+
 def register_user(farmer_name, mobile_email, location, password_hash=None):
     """Register a new farmer."""
     conn = get_db_connection()
@@ -251,6 +302,7 @@ def register_user(farmer_name, mobile_email, location, password_hash=None):
                 ON CONFLICT (mobile_email) DO NOTHING
             ''', (farmer_name, mobile_email, location, password_hash))
         else:
+            # Note: SQLite uses '?' placeholder
             cursor.execute('''
                 INSERT OR IGNORE INTO users (farmer_name, mobile_email, location, password_hash)
                 VALUES (?, ?, ?, ?)
@@ -357,32 +409,7 @@ def get_login_history(limit=100):
     conn.close()
     
     return [dict(h) for h in history]
-            
 
 # Initialize database on import
 init_database()
-    # Users Table - Track registered farmers
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id SERIAL PRIMARY KEY,
-            farmer_name TEXT NOT NULL,
-            mobile_email TEXT UNIQUE NOT NULL,
-            location TEXT,
-            password_hash TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            last_login TIMESTAMP
-        )
-    ''')
-    
-    # Login History Table - Track every login
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS login_history (
-            id SERIAL PRIMARY KEY,
-            user_id INTEGER REFERENCES users(id),
-            login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            ip_address TEXT,
-            device_info TEXT
-        )
-    ''')
-
-              
+        
