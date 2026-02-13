@@ -382,9 +382,7 @@ if "logged_in" not in st.session_state:
 if not st.session_state.logged_in:
     show_login_page()
 else:
-    # Your main app would load here
-    st.write("Welcome " + st.session_state.user['farmer_name'] + "!")
-    if st.button("Logout"):
-        st.session_state.logged_in = False
-        st.rerun()
+    # CONNECT TO MAIN APP
+    from main_app import run_main_app
+    run_main_app(st.session_state.user)
     
