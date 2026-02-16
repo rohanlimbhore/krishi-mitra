@@ -1,26 +1,23 @@
 """
-🌾 Krishi Mitra - Professional Farming Support Application
+🌾 Krishi Mitra - Professional Farming App
 """
 
 import streamlit as st
 import sqlite3
 import hashlib
-from datetime import datetime
-import os
 
-# Must be first
+# Page config
 st.set_page_config(
-    page_title="Krishi Mitra - Farming Assistant",
+    page_title="Krishi Mitra",
     page_icon="🌾",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
 
-# Database setup
+# Database
 DB_PATH = "krishi_mitra.db"
 
 def init_user_db():
-    """Initialize user database."""
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
     cursor = conn.cursor()
     cursor.execute('''
@@ -78,343 +75,338 @@ def login_user(mobile_email, password):
         return False, f"Error: {str(e)}"
 
 # =============================================================================
-# PROFESSIONAL UI WITH WOW BACKGROUND
+# FIXED PROFESSIONAL UI - No White Boxes
 # =============================================================================
 
 def show_login_page():
-    """Display professional login page with animated background."""
     
-    # Professional CSS - Simplified but effective
+    # CSS that actually works - targets Streamlit's containers
     st.markdown("""
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        /* Import font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         
-        * {
+        /* Global font */
+        html, body, [class*="css"] {
             font-family: 'Inter', sans-serif;
         }
         
-        /* Animated gradient background - Sky to Farm */
+        /* Gradient background on main app */
         .stApp {
-            background: linear-gradient(180deg, 
-                #87CEEB 0%,      
-                #B0E0E6 15%,     
-                #98FB98 35%,     
-                #90EE90 50%,     
-                #228B22 70%,     
-                #006400 100%     
-            );
-            background-attachment: fixed;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         
-        /* Main container */
-        .main .block-container {
-            padding-top: 2rem;
-            padding-bottom: 2rem;
+        /* REMOVE ALL DEFAULT CONTAINER STYLES */
+        div[data-testid="stVerticalBlock"] {
+            gap: 0 !important;
         }
         
-        /* Glass card */
         div[data-testid="stVerticalBlock"] > div {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            padding: 40px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            max-width: 420px;
-            margin: 0 auto;
+            background: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            box-shadow: none !important;
         }
         
-        /* Logo animation */
-        .logo-icon {
-            font-size: 72px;
+        /* Hide default streamlit elements */
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header {visibility: hidden;}
+        
+        /* Main container padding */
+        .main .block-container {
+            padding: 20px;
+            max-width: 450px;
+        }
+        
+        /* LOGO SECTION - Outside card */
+        .logo-container {
             text-align: center;
-            animation: bounce 2s infinite;
+            margin-bottom: 25px;
+            color: white;
+        }
+        
+        .logo-emoji {
+            font-size: 60px;
+            margin-bottom: 5px;
             display: block;
-            margin-bottom: 10px;
         }
         
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
+        .logo-title {
+            font-size: 26px;
+            font-weight: 700;
+            margin: 0;
+            color: white;
         }
         
-        /* Title styling */
-        h1 {
-            font-size: 32px !important;
-            font-weight: 700 !important;
-            background: linear-gradient(135deg, #228B22, #006400);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-align: center;
-            margin-bottom: 5px !important;
+        .logo-subtitle {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-top: 3px;
+            color: white;
         }
         
-        /* Tagline */
-        .tagline {
-            text-align: center;
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 30px;
+        /* MAIN CARD - Single white container */
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
         
-        /* Tabs styling */
+        /* TABS - Clean style */
+        .stTabs {
+            margin-bottom: 20px;
+        }
+        
         .stTabs [data-baseweb="tab-list"] {
-            gap: 8px;
-            background: #f0f0f0;
-            border-radius: 12px;
-            padding: 6px;
+            gap: 5px;
+            background: #f3f4f6;
+            border-radius: 10px;
+            padding: 4px;
         }
         
         .stTabs [data-baseweb="tab"] {
             flex: 1;
-            border-radius: 10px;
-            padding: 12px;
+            border-radius: 8px;
+            padding: 10px;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
+            height: auto;
         }
         
         .stTabs [aria-selected="true"] {
-            background: linear-gradient(135deg, #228B22, #32CD32) !important;
+            background: #667eea !important;
             color: white !important;
         }
         
-        /* Input fields */
-        .stTextInput > div > div > input {
-            border-radius: 12px;
-            border: 2px solid #e0e0e0;
-            padding: 15px;
-            font-size: 15px;
-            background: #fafafa;
+        /* INPUT FIELDS - Remove containers */
+        div[data-testid="stTextInput"] {
+            margin-bottom: 12px !important;
         }
         
-        .stTextInput > div > div > input:focus {
-            border-color: #228B22;
-            box-shadow: 0 0 0 3px rgba(34, 139, 34, 0.1);
+        div[data-testid="stTextInput"] > div {
+            background: transparent !important;
+            border: none !important;
         }
         
-        /* Buttons */
+        div[data-testid="stTextInput"] input {
+            border-radius: 10px;
+            border: 1.5px solid #e5e7eb;
+            padding: 12px 14px;
+            font-size: 14px;
+            background: #f9fafb;
+            width: 100%;
+        }
+        
+        div[data-testid="stTextInput"] input:focus {
+            border-color: #667eea;
+            background: white;
+            outline: none;
+        }
+        
+        /* BUTTON - Clean */
+        .stButton {
+            margin-top: 5px;
+        }
+        
         .stButton > button {
             width: 100%;
-            border-radius: 12px;
-            padding: 15px;
-            font-size: 16px;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 15px;
             font-weight: 600;
-            background: linear-gradient(135deg, #228B22, #32CD32) !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
             color: white !important;
             border: none !important;
-            box-shadow: 0 4px 15px rgba(34, 139, 34, 0.3);
-            transition: all 0.3s;
         }
         
-        .stButton > button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(34, 139, 34, 0.4);
+        /* FORM CONTAINER - Remove extra padding */
+        div[data-testid="stForm"] {
+            border: none !important;
+            padding: 0 !important;
+            background: transparent !important;
         }
         
-        /* Feature cards */
-        .feature-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 25px;
+        /* FEATURES ROW */
+        .features-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
         }
         
         .feature-box {
-            background: white;
-            padding: 20px;
-            border-radius: 16px;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            border: 1px solid rgba(0,0,0,0.05);
+            flex: 1;
         }
         
-        .feature-emoji {
-            font-size: 32px;
-            margin-bottom: 8px;
+        .feature-icon {
+            font-size: 22px;
+            margin-bottom: 4px;
         }
         
-        .feature-text {
-            font-size: 12px;
-            font-weight: 600;
-            color: #333;
+        .feature-name {
+            font-size: 10px;
+            color: #6b7280;
+            font-weight: 500;
+            text-transform: uppercase;
         }
         
-        /* Footer */
-        .footer {
+        /* FOOTER */
+        .app-footer {
             text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e0e0e0;
-            color: #888;
+            margin-top: 20px;
+            color: rgba(255,255,255,0.8);
             font-size: 12px;
         }
         
-        /* Hide Streamlit elements */
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        header {visibility: hidden;}
+        /* ALERTS - Clean */
+        .stAlert {
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+        }
         </style>
     """, unsafe_allow_html=True)
     
-    # Center layout
-    col1, col2, col3 = st.columns([1, 2.5, 1])
+    # LOGO - Outside card, centered
+    st.markdown("""
+        <div class="logo-container">
+            <span class="logo-emoji">🌾</span>
+            <h1 class="logo-title">Krishi Mitra</h1>
+            <p class="logo-subtitle">Smart Farming Solutions</p>
+        </div>
+    """, unsafe_allow_html=True)
     
-    with col2:
-        # Logo
-        st.markdown('<div class="logo-icon">🌾</div>', unsafe_allow_html=True)
-        st.markdown('<h1>Krishi Mitra</h1>', unsafe_allow_html=True)
-        st.markdown('<p class="tagline">Your Intelligent Farming Companion</p>', unsafe_allow_html=True)
-        
-        # Tabs
-        tab1, tab2 = st.tabs(["🔐 Sign In", "📝 Create Account"])
-        
-        with tab1:
-            st.markdown("<br>", unsafe_allow_html=True)
-            
+    # MAIN CARD START
+    st.markdown('<div class="login-card">', unsafe_allow_html=True)
+    
+    # TABS
+    tab1, tab2 = st.tabs(["Sign In", "Create Account"])
+    
+    with tab1:
+        # Use form for clean grouping
+        with st.form("login_form", clear_on_submit=False):
             login_email = st.text_input(
-                "📱 Mobile Number or Email",
-                placeholder="Enter your mobile or email",
-                key="login_email"
+                "Mobile/Email",
+                placeholder="Enter mobile number or email",
+                label_visibility="collapsed"
             )
             
             login_password = st.text_input(
-                "🔒 Password",
+                "Password",
                 type="password",
-                placeholder="Enter your password",
-                key="login_password"
+                placeholder="Enter password",
+                label_visibility="collapsed"
             )
             
-            col1, col2 = st.columns([1, 1])
-            with col1:
-                st.markdown("<p style='color: #666; font-size: 12px; margin-top: 10px;'>Forgot password?</p>", 
-                           unsafe_allow_html=True)
+            # Forgot password link
+            st.markdown("<p style='text-align: right; margin: -5px 0 10px 0;'><span style='color: #667eea; font-size: 12px; cursor: pointer;'>Forgot password?</span></p>", 
+                       unsafe_allow_html=True)
             
-            with col2:
-                login_btn = st.button("Sign In →", type="primary", use_container_width=True)
+            submit_login = st.form_submit_button("Sign In →", use_container_width=True)
             
-            if login_btn:
+            if submit_login:
                 if login_email and login_password:
                     success, result = login_user(login_email, login_password)
                     if success:
                         st.session_state.logged_in = True
                         st.session_state.user = result
-                        st.success("✨ Welcome back, " + result['farmer_name'] + "!")
+                        st.success("Welcome back!")
                         st.rerun()
                     else:
-                        st.error("❌ " + result)
+                        st.error(result)
                 else:
-                    st.warning("⚠️ Please fill all fields")
-        
-        with tab2:
-            st.markdown("<br>", unsafe_allow_html=True)
-            
+                    st.warning("Please fill all fields")
+    
+    with tab2:
+        with st.form("register_form", clear_on_submit=False):
             reg_name = st.text_input(
-                "👤 Full Name",
+                "Full Name",
                 placeholder="Your full name",
-                key="reg_name"
+                label_visibility="collapsed"
             )
             
             reg_mobile = st.text_input(
-                "📱 Mobile Number",
+                "Mobile",
                 placeholder="10 digit mobile number",
-                key="reg_mobile"
+                label_visibility="collapsed"
             )
             
             reg_location = st.text_input(
-                "📍 Village/District",
-                placeholder="Your location",
-                key="reg_location"
+                "Location",
+                placeholder="Village / District / State",
+                label_visibility="collapsed"
             )
             
             reg_password = st.text_input(
-                "🔒 Create Password",
+                "Password",
                 type="password",
-                placeholder="Min 6 characters",
-                key="reg_password"
+                placeholder="Create password (min 6 chars)",
+                label_visibility="collapsed"
             )
             
-            reg_confirm = st.text_input(
-                "🔒 Confirm Password",
-                type="password",
-                placeholder="Re-enter password",
-                key="reg_confirm"
-            )
+            submit_reg = st.form_submit_button("Create Account →", use_container_width=True)
             
-            if st.button("Create Account →", type="primary", use_container_width=True):
+            if submit_reg:
                 if all([reg_name, reg_mobile, reg_location, reg_password]):
-                    if reg_password == reg_confirm:
-                        if len(reg_password) >= 6:
-                            success, msg = register_user(reg_mobile, reg_password, reg_name, reg_location)
-                            if success:
-                                st.success("✅ " + msg + " Please sign in.")
-                            else:
-                                st.error("❌ " + msg)
+                    if len(reg_password) >= 6:
+                        success, msg = register_user(reg_mobile, reg_password, reg_name, reg_location)
+                        if success:
+                            st.success("Account created! Please sign in.")
                         else:
-                            st.warning("⚠️ Password must be 6+ characters")
+                            st.error(msg)
                     else:
-                        st.error("❌ Passwords don't match!")
+                        st.warning("Password too short")
                 else:
-                    st.warning("⚠️ Please fill all fields")
-        
-        # Feature boxes using columns
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown("### 🌟 What You Get")
-        
-        c1, c2 = st.columns(2)
-        with c1:
-            st.markdown("""
-                <div style="background: white; padding: 20px; border-radius: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                    <div style="font-size: 32px; margin-bottom: 8px;">🤖</div>
-                    <div style="font-size: 12px; font-weight: 600;">AI Assistant</div>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            
-            st.markdown("""
-                <div style="background: white; padding: 20px; border-radius: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                    <div style="font-size: 32px; margin-bottom: 8px;">👥</div>
-                    <div style="font-size: 12px; font-weight: 600;">Community</div>
-                </div>
-            """, unsafe_allow_html=True)
-        
-        with c2:
-            st.markdown("""
-                <div style="background: white; padding: 20px; border-radius: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                    <div style="font-size: 32px; margin-bottom: 8px;">📸</div>
-                    <div style="font-size: 12px; font-weight: 600;">Crop Scan</div>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            
-            st.markdown("""
-                <div style="background: white; padding: 20px; border-radius: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                    <div style="font-size: 32px; margin-bottom: 8px;">🏛️</div>
-                    <div style="font-size: 12px; font-weight: 600;">Govt Schemes</div>
-                </div>
-            """, unsafe_allow_html=True)
-        
-        # Footer
-        st.markdown("""
-            <div class="footer">
-                <p>Made with ❤️ for Indian Farmers</p>
-                <p>© 2026 Krishi Mitra</p>
+                    st.warning("Please fill all fields")
+    
+    # FEATURES INSIDE CARD
+    st.markdown("""
+        <div class="features-row">
+            <div class="feature-box">
+                <div class="feature-icon">🤖</div>
+                <div class="feature-name">AI Help</div>
             </div>
-        """, unsafe_allow_html=True)
+            <div class="feature-box">
+                <div class="feature-icon">📸</div>
+                <div class="feature-name">Scan</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">👥</div>
+                <div class="feature-name">Community</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🏛️</div>
+                <div class="feature-name">Schemes</div>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # CARD END
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # FOOTER
+    st.markdown("""
+        <div class="app-footer">
+            Made with ❤️ for Indian Farmers • 2026
+        </div>
+    """, unsafe_allow_html=True)
 
 # Initialize
 init_user_db()
 
-# Check login status
+# Session
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
-# Show login or main app
+# Route
 if not st.session_state.logged_in:
     show_login_page()
 else:
-    # CONNECT TO MAIN APP
     from main_app import run_main_app
     run_main_app(st.session_state.user)
-            
+    
