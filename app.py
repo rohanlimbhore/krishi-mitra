@@ -417,4 +417,4 @@ else:
     # CONNECT TO MAIN APP
     from main_app import run_main_app
     run_main_app(st.session_state.user)
-    
+            
