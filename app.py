@@ -78,12 +78,13 @@ def login_user(mobile_email, password):
         return False, f"Error: {str(e)}"
 
 # =============================================================================
-# PROFESSIONAL UI WITH ANIMATIONS
+# PROFESSIONAL UI WITH WOW BACKGROUND
 # =============================================================================
 
 def show_login_page():
-    """Display professional login page with animations."""
-        # Professional CSS with WOW background
+    """Display professional login page with animated background."""
+    
+    # Professional CSS - Simplified but effective
     st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -92,425 +93,179 @@ def show_login_page():
             font-family: 'Inter', sans-serif;
         }
         
-        /* ============================================
-           WOW BACKGROUND - Animated Farming Scene
-           ============================================ */
-        .main {
+        /* Animated gradient background - Sky to Farm */
+        .stApp {
             background: linear-gradient(180deg, 
-                #87CEEB 0%,      /* Sky blue */
-                #E0F6FF 20%,     /* Light sky */
-                #90EE90 40%,     /* Grass start */
-                #228B22 60%,     /* Forest green */
-                #006400 80%,     /* Dark green */
-                #1a4d1a 100%     /* Deep green */
+                #87CEEB 0%,      
+                #B0E0E6 15%,     
+                #98FB98 35%,     
+                #90EE90 50%,     
+                #228B22 70%,     
+                #006400 100%     
             );
             background-attachment: fixed;
-            position: relative;
-            overflow-x: hidden;
         }
         
-        /* Animated sun */
-        .main::before {
-            content: '';
-            position: fixed;
-            top: 50px;
-            right: 50px;
-            width: 100px;
-            height: 100px;
-            background: radial-gradient(circle, #FFD700 0%, #FFA500 50%, transparent 70%);
-            border-radius: 50%;
-            animation: sunPulse 4s ease-in-out infinite;
-            z-index: 0;
+        /* Main container */
+        .main .block-container {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
         }
         
-        @keyframes sunPulse {
-            0%, 100% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.1); opacity: 1; }
-        }
-        
-        /* Floating clouds */
-        .main::after {
-            content: '☁️ ☁️ ☁️';
-            position: fixed;
-            top: 80px;
-            left: -100%;
-            font-size: 60px;
-            opacity: 0.6;
-            animation: cloudsMove 20s linear infinite;
-            z-index: 0;
-        }
-        
-        @keyframes cloudsMove {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-        
-        /* Animated grass/waves at bottom */
-        .grass-waves {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 150px;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23228B22' fill-opacity='0.3' d='M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
-            background-size: cover;
-            animation: waveMove 10s ease-in-out infinite;
-            z-index: 0;
-        }
-        
-        @keyframes waveMove {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        /* ============================================
-           GLASS CARD - Enhanced
-           ============================================ */
-        .glass-card {
+        /* Glass card */
+        div[data-testid="stVerticalBlock"] > div {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
-            border-radius: 30px;
+            border-radius: 24px;
             padding: 40px;
-            box-shadow: 
-                0 25px 50px -12px rgba(0, 0, 0, 0.25),
-                0 0 0 1px rgba(255, 255, 255, 0.3),
-                inset 0 0 80px rgba(255, 255, 255, 0.5);
-            border: 2px solid rgba(255, 255, 255, 0.6);
-            max-width: 440px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            max-width: 420px;
             margin: 0 auto;
-            animation: slideUp 0.8s ease-out;
-            position: relative;
-            z-index: 10;
         }
         
-        /* Shiny border effect */
-        .glass-card::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, #FFD700, #FF6B6B, #4ECDC4, #45B7D1, #96CEB4);
-            border-radius: 32px;
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        .glass-card:hover::before {
-            opacity: 0.5;
-            animation: borderRotate 3s linear infinite;
-        }
-        
-        @keyframes borderRotate {
-            0% { filter: hue-rotate(0deg); }
-            100% { filter: hue-rotate(360deg); }
-        }
-        
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(40px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        /* ============================================
-           LOGO - Enhanced with glow
-           ============================================ */
-        .logo-container {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-        
+        /* Logo animation */
         .logo-icon {
-            font-size: 80px;
-            animation: bounceRotate 3s infinite;
-            display: inline-block;
-            filter: drop-shadow(0 10px 20px rgba(34, 139, 34, 0.3));
+            font-size: 72px;
+            text-align: center;
+            animation: bounce 2s infinite;
+            display: block;
+            margin-bottom: 10px;
         }
         
-        @keyframes bounceRotate {
-            0%, 100% { 
-                transform: translateY(0) rotate(0deg); 
-            }
-            25% { 
-                transform: translateY(-15px) rotate(5deg); 
-            }
-            50% { 
-                transform: translateY(0) rotate(0deg); 
-            }
-            75% { 
-                transform: translateY(-10px) rotate(-5deg); 
-            }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
         }
         
-        .app-title {
-            font-size: 36px;
-            font-weight: 800;
+        /* Title styling */
+        h1 {
+            font-size: 32px !important;
+            font-weight: 700 !important;
             background: linear-gradient(135deg, #228B22, #006400);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-align: center;
-            margin: 0;
-            letter-spacing: -1px;
+            margin-bottom: 5px !important;
         }
         
-        .app-tagline {
+        /* Tagline */
+        .tagline {
             text-align: center;
             color: #666;
             font-size: 14px;
-            margin-top: 8px;
-            font-weight: 500;
+            margin-bottom: 30px;
         }
         
-        /* ============================================
-           TABS - Modern pill style
-           ============================================ */
+        /* Tabs styling */
         .stTabs [data-baseweb="tab-list"] {
             gap: 8px;
-            background: rgba(245, 245, 245, 0.8);
-            border-radius: 16px;
-            padding: 8px;
-            backdrop-filter: blur(10px);
+            background: #f0f0f0;
+            border-radius: 12px;
+            padding: 6px;
         }
         
         .stTabs [data-baseweb="tab"] {
             flex: 1;
-            border-radius: 12px;
-            padding: 14px 24px;
+            border-radius: 10px;
+            padding: 12px;
             font-weight: 600;
             font-size: 14px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: none;
         }
         
         .stTabs [aria-selected="true"] {
-            background: linear-gradient(135deg, #228B22, #32CD32);
-            color: white;
-            box-shadow: 0 8px 20px rgba(34, 139, 34, 0.3);
-            transform: scale(1.02);
+            background: linear-gradient(135deg, #228B22, #32CD32) !important;
+            color: white !important;
         }
         
-        /* ============================================
-           INPUTS - Floating label style
-           ============================================ */
-        div[data-testid="stTextInput"] {
-            position: relative;
-        }
-        
-        div[data-testid="stTextInput"] input {
-            border-radius: 16px;
-            border: 2px solid #e8e8e8;
-            padding: 18px 16px;
+        /* Input fields */
+        .stTextInput > div > div > input {
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            padding: 15px;
             font-size: 15px;
-            transition: all 0.3s ease;
             background: #fafafa;
         }
         
-        div[data-testid="stTextInput"] input:focus {
+        .stTextInput > div > div > input:focus {
             border-color: #228B22;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(34, 139, 34, 0.1), 0 4px 20px rgba(34, 139, 34, 0.1);
-            transform: translateY(-2px);
+            box-shadow: 0 0 0 3px rgba(34, 139, 34, 0.1);
         }
         
-        /* ============================================
-           BUTTON - 3D effect
-           ============================================ */
+        /* Buttons */
         .stButton > button {
             width: 100%;
-            border-radius: 16px;
-            padding: 18px;
+            border-radius: 12px;
+            padding: 15px;
             font-size: 16px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
-            color: white;
-            border: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 
-                0 4px 15px rgba(34, 139, 34, 0.4),
-                0 8px 0 #1a6b1a,
-                inset 0 1px 0 rgba(255,255,255,0.3);
-            position: relative;
-            top: 0;
+            font-weight: 600;
+            background: linear-gradient(135deg, #228B22, #32CD32) !important;
+            color: white !important;
+            border: none !important;
+            box-shadow: 0 4px 15px rgba(34, 139, 34, 0.3);
+            transition: all 0.3s;
         }
         
         .stButton > button:hover {
-            transform: translateY(-3px);
-            box-shadow: 
-                0 8px 25px rgba(34, 139, 34, 0.5),
-                0 12px 0 #1a6b1a,
-                inset 0 1px 0 rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(34, 139, 34, 0.4);
         }
         
-        .stButton > button:active {
-            transform: translateY(4px);
-            box-shadow: 
-                0 2px 10px rgba(34, 139, 34, 0.4),
-                0 4px 0 #1a6b1a,
-                inset 0 1px 0 rgba(255,255,255,0.3);
-        }
-        
-        /* ============================================
-           FEATURE CARDS - 3D hover
-           ============================================ */
-        .features-grid {
+        /* Feature cards */
+        .feature-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-top: 28px;
+            gap: 12px;
+            margin-top: 25px;
         }
         
-        .feature-card {
+        .feature-box {
             background: white;
             padding: 20px;
             border-radius: 16px;
             text-align: center;
-            box-shadow: 
-                0 4px 6px rgba(0,0,0,0.05),
-                0 10px 20px rgba(0,0,0,0.02);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             border: 1px solid rgba(0,0,0,0.05);
-            position: relative;
-            overflow: hidden;
         }
         
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            transition: left 0.5s;
+        .feature-emoji {
+            font-size: 32px;
+            margin-bottom: 8px;
         }
         
-        .feature-card:hover::before {
-            left: 100%;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 
-                0 20px 40px rgba(0,0,0,0.1),
-                0 0 0 2px rgba(34, 139, 34, 0.1);
-        }
-        
-        .feature-icon-small {
-            font-size: 36px;
-            margin-bottom: 12px;
-            transition: transform 0.3s;
-        }
-        
-        .feature-card:hover .feature-icon-small {
-            transform: scale(1.2) rotate(10deg);
-        }
-        
-        .feature-title {
-            font-size: 13px;
-            font-weight: 700;
+        .feature-text {
+            font-size: 12px;
+            font-weight: 600;
             color: #333;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
         
-        /* ============================================
-           FOOTER - Enhanced
-           ============================================ */
+        /* Footer */
         .footer {
             text-align: center;
-            margin-top: 32px;
-            padding-top: 24px;
-            border-top: 2px solid rgba(0,0,0,0.05);
-        }
-        
-        .footer-text {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
             color: #888;
-            font-size: 13px;
-            line-height: 1.6;
+            font-size: 12px;
         }
         
-        .heart {
-            color: #e74c3c;
-            animation: heartbeat 1.5s ease-in-out infinite;
-            display: inline-block;
-        }
-        
-        @keyframes heartbeat {
-            0%, 100% { transform: scale(1); }
-            10% { transform: scale(1.1); }
-            20% { transform: scale(1); }
-            30% { transform: scale(1.1); }
-        }
-        
-        /* ============================================
-           MESSAGES - Modern alerts
-           ============================================ */
-        .stAlert {
-            border-radius: 16px;
-            border: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        
-        /* Success message styling */
-        .stAlert[data-baseweb="notification"] {
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
-            border-left: 4px solid #28a745;
-        }
-        
-        /* Error message styling */
-        .stAlert[data-baseweb="notification"][kind="error"] {
-            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-            border-left: 4px solid #dc3545;
-        }
-        
-        /* ============================================
-           HIDE ELEMENTS
-           ============================================ */
+        /* Hide Streamlit elements */
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         header {visibility: hidden;}
-        
-        /* ============================================
-           FLOATING ELEMENTS
-           ============================================ */
-        .floating-leaf {
-            position: fixed;
-            font-size: 30px;
-            animation: floatLeaf 15s linear infinite;
-            opacity: 0.3;
-            z-index: 1;
-        }
-        
-        @keyframes floatLeaf {
-            0% {
-                transform: translateY(100vh) rotate(0deg);
-                left: 10%;
-            }
-            100% {
-                transform: translateY(-100px) rotate(360deg);
-                left: 90%;
-            }
-        }
         </style>
-        
-        <!-- Floating leaves -->
-        <div class="floating-leaf" style="animation-delay: 0s;">🍃</div>
-        <div class="floating-leaf" style="animation-delay: 5s; font-size: 20px;">🌿</div>
-        <div class="floating-leaf" style="animation-delay: 10s; font-size: 25px;">🌾</div>
-        
-        <!-- Grass waves -->
-        <div class="grass-waves"></div>
     """, unsafe_allow_html=True)
-    # Modern tabs
+    
+    # Center layout
+    col1, col2, col3 = st.columns([1, 2.5, 1])
+    
+    with col2:
+        # Logo
+        st.markdown('<div class="logo-icon">🌾</div>', unsafe_allow_html=True)
+        st.markdown('<h1>Krishi Mitra</h1>', unsafe_allow_html=True)
+        st.markdown('<p class="tagline">Your Intelligent Farming Companion</p>', unsafe_allow_html=True)
+        
+        # Tabs
         tab1, tab2 = st.tabs(["🔐 Sign In", "📝 Create Account"])
         
         with tab1:
@@ -529,26 +284,24 @@ def show_login_page():
                 key="login_password"
             )
             
-            col_forgot, col_login = st.columns([1, 1])
-            
-            with col_forgot:
-                st.markdown("<p style='color: #11998e; font-size: 12px; margin-top: 10px; cursor: pointer;'>Forgot password?</p>", 
+            col1, col2 = st.columns([1, 1])
+            with col1:
+                st.markdown("<p style='color: #666; font-size: 12px; margin-top: 10px;'>Forgot password?</p>", 
                            unsafe_allow_html=True)
             
-            with col_login:
+            with col2:
                 login_btn = st.button("Sign In →", type="primary", use_container_width=True)
             
             if login_btn:
                 if login_email and login_password:
-                    with st.spinner(""):
-                        success, result = login_user(login_email, login_password)
-                        if success:
-                            st.session_state.logged_in = True
-                            st.session_state.user = result
-                            st.success("✨ Welcome back, " + result['farmer_name'] + "!")
-                            st.rerun()
-                        else:
-                            st.error("❌ " + result)
+                    success, result = login_user(login_email, login_password)
+                    if success:
+                        st.session_state.logged_in = True
+                        st.session_state.user = result
+                        st.success("✨ Welcome back, " + result['farmer_name'] + "!")
+                        st.rerun()
+                    else:
+                        st.error("❌ " + result)
                 else:
                     st.warning("⚠️ Please fill all fields")
         
@@ -603,39 +356,52 @@ def show_login_page():
                 else:
                     st.warning("⚠️ Please fill all fields")
         
-        # Feature cards grid
-        st.markdown('''
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon-small">🤖</div>
-                    <div class="feature-title">AI Assistant</div>
+        # Feature boxes using columns
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("### 🌟 What You Get")
+        
+        c1, c2 = st.columns(2)
+        with c1:
+            st.markdown("""
+                <div style="background: white; padding: 20px; border-radius: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <div style="font-size: 32px; margin-bottom: 8px;">🤖</div>
+                    <div style="font-size: 12px; font-weight: 600;">AI Assistant</div>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon-small">📸</div>
-                    <div class="feature-title">Crop Scan</div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            st.markdown("""
+                <div style="background: white; padding: 20px; border-radius: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <div style="font-size: 32px; margin-bottom: 8px;">👥</div>
+                    <div style="font-size: 12px; font-weight: 600;">Community</div>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon-small">👥</div>
-                    <div class="feature-title">Community</div>
+            """, unsafe_allow_html=True)
+        
+        with c2:
+            st.markdown("""
+                <div style="background: white; padding: 20px; border-radius: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <div style="font-size: 32px; margin-bottom: 8px;">📸</div>
+                    <div style="font-size: 12px; font-weight: 600;">Crop Scan</div>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon-small">🏛️</div>
-                    <div class="feature-title">Govt Schemes</div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            st.markdown("""
+                <div style="background: white; padding: 20px; border-radius: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <div style="font-size: 32px; margin-bottom: 8px;">🏛️</div>
+                    <div style="font-size: 12px; font-weight: 600;">Govt Schemes</div>
                 </div>
-            </div>
-        ''', unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
         
         # Footer
-        st.markdown('''
+        st.markdown("""
             <div class="footer">
-                <p class="footer-text">
-                    Made with <span class="heart">❤️</span> for Indian Farmers<br>
-                    © 2026 Krishi Mitra
-                </p>
+                <p>Made with ❤️ for Indian Farmers</p>
+                <p>© 2026 Krishi Mitra</p>
             </div>
-        ''', unsafe_allow_html=True)
-        
-        st.markdown('</div>', unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
 # Initialize
 init_user_db()
