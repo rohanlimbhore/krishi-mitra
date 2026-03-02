@@ -908,4 +908,4 @@ def run_main_app(user):
         <h2>{get_text('crop_knowledge', selected_lang)}</h2>
         <p>Get complete growing guides, pest management, and harvest tips for any crop.</p>
         </div>
-        """
+        """, unsafe_allow_html=True)
