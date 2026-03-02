@@ -13,9 +13,8 @@ st.set_page_config(
     page_title="Krishi Mitra - Farming Assistant",
     page_icon="🌾",
     layout="centered",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"    # ← changed to expanded
 )
-
 # Database setup
 DB_PATH = "krishi_mitra.db"
 
