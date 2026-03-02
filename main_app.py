@@ -904,8 +904,8 @@ def run_main_app(user):
     # ── CROP KNOWLEDGE ──
     elif page == get_text('crop_knowledge', selected_lang):
         st.markdown(f"""
-            <div class="km-page-banner">
-                <h2>{get_text('crop_knowledge', selected_lang)}</h2>
-                <p>Get complete growing guides, pest management, and harvest tips for any crop.</p>
-            </div>
+        <div class="km-page-banner">
+        <h2>{get_text('crop_knowledge', selected_lang)}</h2>
+        <p>Get complete growing guides, pest management, and harvest tips for any crop.</p>
+        </div>
         """
