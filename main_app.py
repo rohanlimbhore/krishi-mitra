@@ -12,7 +12,7 @@ from config import APP_NAME, APP_TAGLINE, SUPPORTED_LANGUAGES, IMAGES_DIR, VIDEO
 from database import create_post, get_all_posts, add_product, get_all_products, search_products
 from ai_service import get_ai_service
 from utils import (
-    validate_image, validate_video, compress_image, 
+    validate_image, validate_video, compress_image,
     save_uploaded_file, get_language_name, format_datetime
 )
 
@@ -392,200 +392,446 @@ def get_text(key, lang='en'):
     return TRANSLATIONS.get(lang, TRANSLATIONS['en']).get(key, TRANSLATIONS['en'][key])
 
 # =============================================================================
+# GLOBAL CSS
+# =============================================================================
+
+def inject_global_css():
+    st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap');
+
+    * { font-family: 'Sora', sans-serif !important; }
+
+    /* ── Page background ── */
+    [data-testid="stAppViewContainer"] {
+        background: #f0fdf6;
+    }
+    [data-testid="stAppViewContainer"] > .main {
+        background: transparent !important;
+    }
+    .main .block-container {
+        padding-top: 1.5rem !important;
+        padding-bottom: 2rem !important;
+        max-width: 960px !important;
+    }
+
+    /* ── Sidebar ── */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #0a3d2e 0%, #0f5c40 40%, #166f4e 100%) !important;
+        border-right: none !important;
+    }
+    [data-testid="stSidebar"] * {
+        color: #e0f5eb !important;
+    }
+    [data-testid="stSidebar"] .stRadio label {
+        background: rgba(255,255,255,0.06) !important;
+        border-radius: 10px !important;
+        padding: 10px 14px !important;
+        margin-bottom: 4px !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        display: block !important;
+        font-weight: 500 !important;
+        font-size: 14px !important;
+        border: 1px solid rgba(255,255,255,0.07) !important;
+    }
+    [data-testid="stSidebar"] .stRadio label:hover {
+        background: rgba(255,255,255,0.14) !important;
+        border-color: rgba(56, 239, 125, 0.3) !important;
+    }
+    [data-testid="stSidebar"] .stRadio [data-checked="true"] + label,
+    [data-testid="stSidebar"] input[type="radio"]:checked + div {
+        background: linear-gradient(135deg, rgba(17,153,142,0.5), rgba(56,239,125,0.3)) !important;
+    }
+    [data-testid="stSidebar"] .stSelectbox select,
+    [data-testid="stSidebar"] .stSelectbox > div > div {
+        background: rgba(255,255,255,0.1) !important;
+        border-color: rgba(255,255,255,0.2) !important;
+        color: white !important;
+        border-radius: 10px !important;
+    }
+    [data-testid="stSidebar"] hr {
+        border-color: rgba(255,255,255,0.15) !
+        important;
+    }
+    [data-testid="stSidebar"] .stButton > button {
+        background: linear-gradient(135deg, #c0392b, #e74c3c) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+        width: 100% !important;
+        padding: 10px !important;
+    }
+    [data-testid="stSidebar"] .stButton > button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 16px rgba(231,76,60,0.4) !important;
+    }
+
+    /* ── Tabs ── */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 6px !important;
+        background: #e8f5ee !important;
+        border-radius: 14px !important;
+        padding: 6px !important;
+        border: 1px solid #c8e6d4 !important;
+    }
+    .stTabs [data-baseweb="tab"] {
+        flex: 1 !important;
+        border-radius: 10px !important;
+        padding: 10px 16px !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+        color: #4a7a60 !important;
+        transition: all 0.25s !important;
+        background: transparent !important;
+    }
+    .stTabs [data-baseweb="tab"][aria-selected="true"] {
+        background: linear-gradient(135deg, #0f8a72, #2dd47a) !important;
+        color: white !important;
+        box-shadow: 0 4px 14px rgba(17,153,142,0.3) !important;
+    }
+    .stTabs [data-baseweb="tab-highlight"],
+    .stTabs [data-baseweb="tab-border"] {
+        display: none !important;
+        background: transparent !important;
+    }
+
+    /* ── Inputs ── */
+    div[data-testid="stTextInput"] input,
+    div[data-testid="stTextArea"] textarea {
+        border-radius: 12px !important;
+        border: 2px solid #d4ede3 !important;
+        padding: 12px 16px !important;
+        font-size: 14px !important;
+        font-family: 'Sora', sans-serif !important;
+        background: #f8fdfb !important;
+        transition: all 0.25s !important;
+        color: #1a1a1a !important;
+    }
+    div[data-testid="stTextInput"] input:focus,
+    div[data-testid="stTextArea"] textarea:focus {
+        border-color: #11998e !important;
+        background: white !important;
+        box-shadow: 0 0 0 4px rgba(17,153,142,0.1) !important;
+    }
+    div[data-testid="stTextInput"] label,
+    div[data-testid="stTextArea"] label {
+        font-weight: 600 !important;
+        font-size: 13px !important;
+        color: #2d4a3e !important;
+    }
+
+    /* ── Buttons ── */
+    .stButton > button[kind="primary"],
+    .stButton > button[type="primary"] {
+        border-radius: 12px !important;
+        padding: 12px 20px !important;
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        background: linear-gradient(135deg, #0f8a72, #2dd47a) !important;
+        color: white !important;
+        border: none !important;
+        box-shadow: 0 4px 16px rgba(17,153,142,0.3) !important;
+        transition: all 0.25s !important;
+    }
+    .stButton > button {
+        border-radius: 12px !important;
+        padding: 10px 16px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        font-family: 'Sora', sans-serif !important;
+        border: 1.5px solid #c8e6d4 !important;
+        transition: all 0.2s !important;
+        background: white !important;
+        color: #1a6644 !important;
+    }
+    .stButton > button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 18px rgba(17,153,142,0.2) !important;
+        border-color: #11998e !important;
+    }
+
+    /* ── Metrics ── */
+    div[data-testid="metric-container"] {
+        background: white !important;
+        border-radius: 16px !important;
+        padding: 20px !important;
+        border: 1px solid #d4ede3 !important;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.04) !important;
+        text-align: center !important;
+    }
+    div[data-testid="metric-container"] label {
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        color: #6b9c80 !important;
+    }
+    div[data-testid="metric-container"] [data-testid="stMetricValue"] {
+        font-size: 32px !important;
+        font-weight: 800 !important;
+        color: #0f8a72 !important;
+    }
+
+    /* ── File uploader ── */
+    [data-testid="stFileUploader"] {
+        border-radius: 14px !important;
+        border: 2px dashed #b8ddc9 !important;
+        background: #f8fdfb !important;
+        padding: 16px !important;
+        transition: all 0.25s !important;
+    }
+    [data-testid="stFileUploader"]:hover {
+        border-color: #11998e !important;
+        background: #f0faf5 !important;
+    }
+
+    /* ── Chat messages ── */
+    [data-testid="stChatMessage"] {
+        border-radius: 16px !important;
+        padding: 4px !important;
+    }
+
+    /* ── Alerts ── */
+    div[data-testid="stAlert"] {
+        border-radius: 12px !important;
+        border: none !important;
+        font-size: 14px !important;
+    }
+
+    /* ── Forms ── */
+    [data-testid="stForm"] {
+        background: white !important;
+        border-radius: 20px !important;
+        padding: 24px !important;
+        border: 1px solid #d4ede3 !important;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04) !important;
+    }
+
+    /* ── Section headers ── */
+    h1, h2, h3 {
+        color: #0a3d2e !important;
+    }
+
+    /* ── Hide Streamlit chrome ── */
+    #MainMenu { visibility: hidden; }
+    footer     { visibility: hidden; }
+    header     { visibility: hidden; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: #b8ddc9; border-radius: 4px; }
+
+    /* ── Page header banner ── */
+    .km-page-banner {
+        background: linear-gradient(135deg, #0a3d2e 0%, #11998e 60%, #38ef7d 100%);
+        border-radius: 20px;
+        padding: 24px 28px;
+        margin-bottom: 24px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+    .km-page-banner::after {
+        content: '';
+        position: absolute;
+        right: -20px; top: -20px;
+        width: 120px; height: 120px;
+        background: rgba(255,255,255,0.06);
+        border-radius: 50%;
+    }
+    .km-page-banner h2 {
+        color: white !important;
+        margin: 0 0 4px 0;
+        font-size: 22px;
+        font-weight: 700;
+    }
+    .km-page-banner p {
+        color: rgba(255,255,255,0.8);
+        margin: 0;
+        font-size: 13px;
+    }
+
+    /* ── Card ── */
+    .km-card {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid #d4ede3;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+        margin-bottom: 14px;
+        transition: all 0.25s;
+    }
+    .km-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(17,153,142,0.12);
+        border-color: #99d4b8;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+
+# =============================================================================
 # MAIN APP FUNCTION
 # =============================================================================
 
 def run_main_app(user):
     """Run main application with all features."""
-    
-    # Get selected language
+
+    inject_global_css()
+
     selected_lang = st.session_state.get('selected_language', 'en')
-    
-    # =============================================================================
-    # SIDEBAR NAVIGATION
-    # =============================================================================
-    st.sidebar.markdown(f"## 🌾 Krishi Mitra")
-    st.sidebar.markdown(f"*{APP_TAGLINE}*")
-    st.sidebar.markdown("---")
-    
-    # Navigation with translated labels
-    page_options = [
-        get_text('home', selected_lang),
-        get_text('ai_assistant', selected_lang),
-        get_text('crop_diagnosis', selected_lang),
-        get_text('crop_knowledge', selected_lang),
-        get_text('community', selected_lang),
-        get_text('schemes', selected_lang),
-        get_text('products', selected_lang)
-    ]
-    
-    page = st.sidebar.radio(
-        get_text('select_feature', selected_lang),
-        options=page_options
-    )
-    
-        # Language selector in sidebar
-    st.sidebar.markdown(f"### 🌐 {get_text('language', selected_lang)}")
-    lang_options = {
-        'en': 'English',
-        'mr': 'मराठी (Marathi)',
-        'hi': 'हिन्दी (Hindi)',
-        'gu': 'ગુજરાતી (Gujarati)',
-        'ta': 'தமிழ் (Tamil)',
-        'te': 'తెలుగు (Telugu)',
-        'kn': 'ಕನ್ನಡ (Kannada)'
-    }
-    
-    selected_lang_key = st.sidebar.selectbox(
-        "Select Language / भाषा चुनें",
-        options=list(lang_options.keys()),
-        format_func=lambda x: lang_options[x],
-        index=list(lang_options.keys()).index(selected_lang),
-        key='language_selector'
-    )
-    
-    # Update session state if language changed
-    if selected_lang_key != selected_lang:
-        st.session_state['selected_language'] = selected_lang_key
-        st.rerun()
-    
-        st.sidebar.markdown("---")
-    
-                
-    
-    # =============================================================================
-    # HOME PAGE
-    # =============================================================================
+
+    # ── SIDEBAR ──
+    with st.sidebar:
+        st.markdown(f"""
+            <div style="text-align:center; padding: 12px 0 20px;">
+                <div style="font-size:48px; margin-bottom:6px;">🌾</div>
+                <div style="font-size:20px; font-weight:800; color:white; letter-spacing:-0.3px;">Krishi Mitra</div>
+                <div style="font-size:11px; color:rgba(255,255,255,0.6); margin-top:3px;">{APP_TAGLINE}</div>
+            </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown(f"""
+            <div style="background:rgba(255,255,255,0.1); border-radius:12px; padding:10px 14px; margin-bottom:16px; border:1px solid rgba(255,255,255,0.15);">
+                <div style="font-size:12px; color:rgba(255,255,255,0.6);">Logged in as</div>
+                <div style="font-size:14px; font-weight:700; color:white; margin-top:2px;">👤 {user['farmer_name']}</div>
+                <div style="font-size:11px; color:rgba(255,255,255,0.5);">📍 {user['location']}</div>
+            </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("<hr style='border-color:rgba(255,255,255,0.12); margin:0 0 12px;'>", unsafe_allow_html=True)
+
+        page_options = [
+            get_text('home', selected_lang),
+            get_text('ai_assistant', selected_lang),
+            get_text('crop_diagnosis', selected_lang),
+            get_text('crop_knowledge', selected_lang),
+            get_text('community', selected_lang),
+            get_text('schemes', selected_lang),
+            get_text('products', selected_lang)
+        ]
+
+        st.markdown(f"<div style='font-size:11px; font-weight:700; color:rgba(255,255,255,0.45); letter-spacing:1px; text-transform:uppercase; margin-bottom:8px;'>{get_text('select_feature', selected_lang)}</div>", unsafe_allow_html=True)
+
+        page = st.radio("", options=page_options, label_visibility="collapsed")
+
+        st.markdown("<hr style='border-color:rgba(255,255,255,0.12); margin:14px 0;'>", unsafe_allow_html=True)
+
+        st.markdown(f"<div style='font-size:11px; font-weight:700; color:rgba(255,255,255,0.45); letter-spacing:1px; text-transform:uppercase; margin-bottom:8px;'>🌐 {get_text('language', selected_lang)}</div>", unsafe_allow_html=True)
+
+        lang_options = {
+            'en': 'English', 'mr': 'मराठी (Marathi)', 'hi': 'हिन्दी (Hindi)',
+            'gu': 'ગુજરાતી (Gujarati)', 'ta': 'தமிழ் (Tamil)',
+            'te': 'తెలుగు (Telugu)', 'kn': 'ಕನ್ನಡ (Kannada)'
+        }
+
+        selected_lang_key = st.selectbox(
+            "Language", options=list(lang_options.keys()),
+            format_func=lambda x: lang_options[x],
+            index=list(lang_options.keys()).index(selected_lang),
+            key='language_selector', label_visibility="collapsed"
+        )
+
+        if selected_lang_key != selected_lang:
+            st.session_state['selected_language'] = selected_lang_key
+            st.rerun()
+
+        st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
+
+        if st.button(f"{get_text('logout', selected_lang)}", use_container_width=True):
+            st.session_state.logged_in = False
+            st.session_state.user = None
+            st.rerun()
+
+    # ── HOME PAGE ──
     if page == get_text('home', selected_lang):
-        st.markdown(f'<h1 style="text-align:center; color:#2E7D32;">🌾 Krishi Mitra</h1>', unsafe_allow_html=True)
-        st.markdown(f'<h3 style="text-align:center; color:#558B2F;">{get_text("welcome", selected_lang)}, {user["farmer_name"]}!</h3>', unsafe_allow_html=True)
-        
-        # User Guide
-        st.markdown("---")
-        st.subheader(get_text('user_guide', selected_lang))
-        
-        st.markdown(f"**{get_text('how_to_use', selected_lang)}**")
-        st.markdown(f"1. {get_text('feature_1', selected_lang)}")
-        st.markdown(f"2. {get_text('feature_2', selected_lang)}")
-        st.markdown(f"3. {get_text('feature_3', selected_lang)}")
-        st.markdown(f"4. {get_text('feature_4', selected_lang)}")
-        st.markdown(f"5. {get_text('feature_5', selected_lang)}")
-        st.markdown(f"6. {get_text('feature_6', selected_lang)}")
-        
-        # Feature cards
-        st.markdown("---")
+        st.markdown(f"""
+            <div class="km-page-banner">
+                <h2>🌾 {get_text('welcome', selected_lang)}, {user['farmer_name']}!</h2>
+                <p>{get_text('tagline', selected_lang)}</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+        features = [
+            ('💬', get_text('ai_assistant', selected_lang), get_text('feature_1', selected_lang)),
+            ('📸', get_text('crop_diagnosis', selected_lang), get_text('feature_2', selected_lang)),
+            ('📚', get_text('crop_knowledge', selected_lang), get_text('feature_3', selected_lang)),
+            ('👥', get_text('community', selected_lang), get_text('feature_4', selected_lang)),
+            ('🏛️', get_text('schemes', selected_lang), get_text('feature_5', selected_lang)),
+            ('🥬', get_text('products', selected_lang), get_text('feature_6', selected_lang)),
+        ]
+
         col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.markdown(f"""
-            <div style="background-color:#F1F8E9; padding:20px; border-radius:10px; border-left:5px solid #689F38;">
-                <h3>🤖 {get_text('ai_assistant', selected_lang).split(' ')[1]}</h3>
-                <p>{get_text('ask_question', selected_lang)}</p>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        with col2:
-            st.markdown(f"""
-            <div style="background-color:#F1F8E9; padding:20px; border-radius:10px; border-left:5px solid #689F38;">
-                <h3>📸 {get_text('crop_diagnosis', selected_lang).split(' ')[1]}</h3>
-                <p>{get_text('upload_image', selected_lang)}</p>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        with col3:
-            st.markdown(f"""
-            <div style="background-color:#F1F8E9; padding:20px; border-radius:10px; border-left:5px solid #689F38;">
-                <h3>👥 {get_text('community', selected_lang).split(' ')[1]}</h3>
-                <p>{get_text('share_experience', selected_lang)}</p>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        # Stats
-        st.markdown("---")
-        st.subheader(get_text('platform_overview', selected_lang))
-        
-        col1, col2, col3 = st.columns(3)
-        
+        cols = [col1, col2, col3]
+        for i, (icon, title, desc) in enumerate(features):
+            with cols[i % 3]:
+                st.markdown(f"""
+                    <div class="km-card" style="text-align:center; padding:22px 16px;">
+                        <div style="font-size:36px; margin-bottom:10px;">{icon}</div>
+                        <div style="font-size:13px; font-weight:700; color:#0a3d2e; margin-bottom:6px;">{title}</div>
+                        <div style="font-size:11.5px; color:#6b9c80; line-height:1.5;">{desc}</div>
+                    </div>
+                """, unsafe_allow_html=True)
+
+        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+        st.markdown(f"""<div style="font-size:13px; font-weight:700; color:#0a3d2e; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:12px;">{get_text('platform_overview', selected_lang)}</div>""", unsafe_allow_html=True)
+
         posts = get_all_posts(limit=1000)
-        products = get_all_products(limit=1000)
-        
+        products_list = get_all_products(limit=1000)
+
+        col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric(get_text('community', selected_lang).split(' ')[1], len(posts))
+            st.metric("📰 Community Posts", len(posts))
         with col2:
-            st.metric(get_text('products', selected_lang).split(' ')[1], len(products))
+            st.metric("🥬 Products Listed", len(products_list))
         with col3:
-            st.metric(get_text('language', selected_lang), len(SUPPORTED_LANGUAGES))
-        
-        # Made with love footer on home page
-        st.markdown("---")
+            st.metric("🌐 Languages", len(SUPPORTED_LANGUAGES))
+
         ft = TRANSLATIONS.get(selected_lang, TRANSLATIONS['en'])
         st.markdown(f"""
-        <div style="text-align: center; background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%); padding: 25px; border-radius: 15px; margin-top: 20px; border: 2px solid #4CAF50;">
-            <p style="font-size: 24px; margin-bottom: 10px;">🌾</p>
-            <p style="font-size: 18px; color: #1B5E20; margin-bottom: 5px; font-weight: bold;">
-                <strong>Krishi Mitra</strong>
-            </p>
-            <p style="font-size: 16px; color: #2E7D32; margin-bottom: 5px;">
-                {ft['tagline']}
-            </p>
-            <p style="font-size: 14px; color: #388E3C; margin-bottom: 10px;">
-                {ft['made_with_love']}
-            </p>
-            <p style="font-size: 12px; color: #666; border-top: 1px solid #A5D6A7; padding-top: 10px; margin-top: 10px;">
-                {ft['copyright']}
-            </p>
-        </div>
+            <div style="text-align:center; background:linear-gradient(135deg,#0a3d2e,#11998e); border-radius:20px; padding:28px; margin-top:24px; color:white;">
+                <div style="font-size:36px; margin-bottom:8px;">🌾</div>
+                <div style="font-size:18px; font-weight:800; margin-bottom:4px;">Krishi Mitra</div>
+                <div style="font-size:13px; color:rgba(255,255,255,0.75); margin-bottom:6px;">{ft['tagline']}</div>
+                <div style="font-size:13px; color:rgba(255,255,255,0.65);">{ft['made_with_love']}</div>
+                <div style="margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.15); font-size:11px; color:rgba(255,255,255,0.45);">{ft['copyright']}</div>
+            </div>
         """, unsafe_allow_html=True)
-    
-    # =============================================================================
-    # AI FARMING ASSISTANT - NO VOICE
-    # =============================================================================
+
+    # ── AI ASSISTANT ──
     elif page == get_text('ai_assistant', selected_lang):
-        st.header(get_text('ai_assistant', selected_lang))
-        
-        st.markdown(f"🌐 {get_text('language', selected_lang)}: **{get_language_name(selected_lang)}**")
-        st.markdown(get_text('ask_question', selected_lang))
-        
-        # Initialize chat history
+        st.markdown(f"""
+            <div class="km-page-banner">
+                <h2>{get_text('ai_assistant', selected_lang)}</h2>
+                <p>🌐 {get_text('language', selected_lang)}: <strong>{get_language_name(selected_lang)}</strong> · {get_text('ask_question', selected_lang)}</p>
+            </div>
+        """, unsafe_allow_html=True)
+
         if "chat_history" not in st.session_state:
             st.session_state.chat_history = []
-        
-        # Display chat history - NO VOICE BUTTONS
+
         for idx, message in enumerate(st.session_state.chat_history):
             with st.chat_message(message["role"]):
                 st.write(message["content"])
                 if "language" in message:
                     st.caption(f"{get_text('language', selected_lang)}: {get_language_name(message['language'])}")
-        
-        # Text input
+
         user_query = st.chat_input(get_text('type_here', selected_lang))
-        
+
         if user_query:
-            st.session_state.chat_history.append({
-                "role": "user", 
-                "content": user_query
-            })
-            
+            st.session_state.chat_history.append({"role": "user", "content": user_query})
             with st.chat_message("user"):
                 st.write(user_query)
-            
             with st.spinner("🤖 Thinking..."):
                 response = ai_service.get_farming_response(user_query, selected_lang)
-            
-            st.session_state.chat_history.append({
-                "role": "assistant", 
-                "content": response,
-                "language": selected_lang
-            })
-            
+            st.session_state.chat_history.append({"role": "assistant", "content": response, "language": selected_lang})
             with st.chat_message("assistant"):
                 st.write(response)
                 st.caption(f"{get_text('language', selected_lang)}: {get_language_name(selected_lang)}")
-        
-        # Quick questions
-        st.markdown("---")
-        st.subheader(get_text('quick_questions', selected_lang))
-        
+
+        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+        st.markdown(f"""<div style="font-size:13px; font-weight:700; color:#0a3d2e; margin-bottom:10px;">{get_text('quick_questions', selected_lang)}</div>""", unsafe_allow_html=True)
+
         quick_questions = {
             'en': ["How to control aphids?", "Best fertilizer for rice", "Organic pest control", "Water management"],
             'mr': ["अ‍ॅफिड्स कसे नियंत्रित करावे?", "भातासाठी सर्वोत्तम खत", "सेंद्रिय कीटक नियंत्रण", "पाणी व्यवस्थापन"],
@@ -595,44 +841,33 @@ def run_main_app(user):
             'te': ["ఎఫిడ్లను నియంత్రించడం?", "వరికి ఎరువు", "సేంద్రీయ పురుగు నియంత్రణ", "నీటి నిర్వహణ"],
             'kn': ["ಎಫಿಡ್‌ಗಳನ್ನು ನಿಯಂತ್ರಿಸುವುದು?", "ಭತ್ತಕ್ಕೆ ಗೊಬ್ಬರ", "ಸಾವಯವ ಕೀಟ ನಿಯಂತ್ರಣ", "ನೀರಿನ ವ್ಯವಸ್ಥಾಪನೆ"]
         }
-        
+
         questions = quick_questions.get(selected_lang, quick_questions['en'])
-        
         cols = st.columns(len(questions))
         for idx, question in enumerate(questions):
             with cols[idx]:
-                if st.button(question[:15] + "...", key=f"quick_{idx}"):
-                    st.session_state.chat_history.append({
-                        "role": "user", 
-                        "content": question
-                    })
+                if st.button(question[:18] + "…" if len(question) > 18 else question, key=f"quick_{idx}"):
+                    st.session_state.chat_history.append({"role": "user", "content": question})
                     st.rerun()
-    
-    # =============================================================================
-    # CROP DIAGNOSIS - NO VOICE
-    # =============================================================================
+
+    # ── CROP DIAGNOSIS ──
     elif page == get_text('crop_diagnosis', selected_lang):
-        st.header(get_text('crop_diagnosis', selected_lang))
-        
+        st.markdown(f"""
+            <div class="km-page-banner">
+                <h2>{get_text('crop_diagnosis', selected_lang)}</h2>
+                <p>Upload a clear photo of your crop to detect diseases and get recommendations.</p>
+            </div>
+        """, unsafe_allow_html=True)
+
         col1, col2 = st.columns([1, 1])
-        
         with col1:
-            st.subheader(get_text('upload_image', selected_lang))
-            uploaded_file = st.file_uploader(
-                "Choose image", 
-                type=['jpg', 'jpeg', 'png'],
-                help="Upload clear photo"
-            )
-            
-            additional_context = st.text_area(
-                "Additional info (optional)",
-                placeholder="Describe symptoms..."
-            )
-            
-            analyze_btn = st.button(get_text('analyze', selected_lang), type="primary")
-        
+            st.markdown(f"<div style='font-weight:700; color:#0a3d2e; margin-bottom:8px;'>{get_text('upload_image', selected_lang)}</div>", unsafe_allow_html=True)
+            uploaded_file = st.file_uploader("Choose image", type=['jpg', 'jpeg', 'png'], help="Upload clear photo", label_visibility="collapsed")
+            additional_context = st.text_area("Additional info (optional)", placeholder="Describe symptoms...")
+            analyze_btn = st.button(get_text('analyze', selected_lang), type="primary", use_container_width=True)
+
         with col2:
-            st.subheader(get_text('preview', selected_lang))
+            st.markdown(f"<div style='font-weight:700; color:#0a3d2e; margin-bottom:8px;'>{get_text('preview', selected_lang)}</div>", unsafe_allow_html=True)
             if uploaded_file:
                 is_valid, msg = validate_image(uploaded_file)
                 if is_valid:
@@ -641,251 +876,36 @@ def run_main_app(user):
                 else:
                     st.error(msg)
             else:
-                st.info("Image preview will appear here")
-        
+                st.markdown("""
+                    <div style="background:#f8fdfb; border:2px dashed #c8e6d4; border-radius:16px; padding:48px 24px; text-align:center; color:#a0bdb3;">
+                        <div style="font-size:40px; margin-bottom:8px;">🖼️</div>
+                        <div style="font-size:13px;">Image preview will appear here</div>
+                    </div>
+                """, unsafe_allow_html=True)
+
         if analyze_btn and uploaded_file:
             is_valid, msg = validate_image(uploaded_file)
             if not is_valid:
                 st.error(msg)
             else:
-                with st.spinner("🧠 Analyzing..."):
+                with st.spinner("🧠 Analyzing your crop..."):
                     compressed_image = compress_image(uploaded_file)
-                    
                     if compressed_image:
-                        analysis = ai_service.analyze_crop_image(
-                            compressed_image, 
-                            additional_context,
-                            selected_lang
-                        )
-                        
-                        st.markdown("---")
-                        st.subheader(get_text('analysis_report', selected_lang))
+                        analysis = ai_service.analyze_crop_image(compressed_image, additional_context, selected_lang)
+                        st.markdown(f"""
+                            <div style="background:linear-gradient(135deg,#f0faf5,#e8f5ee); border-radius:16px; padding:20px 24px; border:1px solid #c8e6d4; margin-top:16px;">
+                                <div style="font-size:15px; font-weight:700; color:#0a3d2e; margin-bottom:12px;">📋 {get_text('analysis_report', selected_lang)}</div>
+                            </div>
+                        """, unsafe_allow_html=True)
                         st.markdown(analysis)
                     else:
                         st.error("Failed to process image")
-    
-    # =============================================================================
-    # CROP KNOWLEDGE - NO VOICE
-    # =============================================================================
+
+    # ── CROP KNOWLEDGE ──
     elif page == get_text('crop_knowledge', selected_lang):
-        st.header(get_text('crop_knowledge', selected_lang))
-        
-        crop_name = st.text_input(
-            get_text('enter_crop', selected_lang),
-            placeholder="e.g., Wheat, Rice, Cotton..."
-        )
-        
-        if st.button(get_text('generate', selected_lang), type="primary") and crop_name:
-            with st.spinner("🌱 Generating..."):
-                knowledge = ai_service.generate_crop_knowledge(crop_name, selected_lang)
-                
-                st.markdown("---")
-                st.markdown(knowledge)
-    
-    # =============================================================================
-    # FARMER COMMUNITY - NO VOICE
-    # =============================================================================
-    elif page == get_text('community', selected_lang):
-        st.header(get_text('community', selected_lang))
-        
-        tab1, tab2 = st.tabs([get_text('view_posts', selected_lang), get_text('create_post', selected_lang)])
-        
-        with tab1:
-            st.subheader(get_text('view_posts', selected_lang))
-            
-            posts = get_all_posts(limit=20)
-            
-            if not posts:
-                st.info("No posts yet!")
-            else:
-                for post in posts:
-                    with st.container():
-                        st.markdown(f"""
-                        <div style="background-color:white; border:1px solid #E0E0E0; border-radius:10px; padding:15px; margin-bottom:15px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
-                            <h4>👤 {post['farmer_name']}</h4>
-                            <p>{post['content']}</p>
-                            <small>🕐 {format_datetime(post['created_at'])}</small>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                        if post['image_path'] and os.path.exists(post['image_path']):
-                            st.image(post['image_path'], use_column_width=True)
-                        
-                        if post['video_path'] and os.path.exists(post['video_path']):
-                            st.video(post['video_path'])
-                        
-                        st.markdown("---")
-        
-        with tab2:
-            st.subheader(get_text('create_post', selected_lang))
-            
-            with st.form("post_form"):
-                farmer_name = st.text_input(get_text('your_name', selected_lang), value=user['farmer_name'])
-                content = st.text_area(
-                    get_text('share_experience', selected_lang), 
-                    placeholder="Share your experience..."
-                )
-                
-                col1, col2 = st.columns(2)
-                with col1:
-                    image_file = st.file_uploader(get_text('attach_photo', selected_lang), type=['jpg', 'jpeg', 'png'])
-                with col2:
-                    video_file = st.file_uploader(get_text('attach_video', selected_lang), type=['mp4'])
-                
-                submitted = st.form_submit_button(get_text('post', selected_lang), type="primary")
-                
-                if submitted:
-                    if not content:
-                        st.error("Please enter content!")
-                    else:
-                        image_path = None
-                        video_path = None
-                        
-                        if image_file:
-                            is_valid, msg = validate_image(image_file)
-                            if not is_valid:
-                                st.error(f"Image error: {msg}")
-                                st.stop()
-                            image_path = save_uploaded_file(image_file, IMAGES_DIR)
-                        
-                        if video_file:
-                            is_valid, msg = validate_video(video_file)
-                            if not is_valid:
-                                st.error(f"Video error: {msg}")
-                                st.stop()
-                            video_path = save_uploaded_file(video_file, VIDEOS_DIR)
-                        
-                        post_id = create_post(farmer_name, content, image_path, video_path)
-                        st.success("Posted successfully!")
-                        st.balloons()
-                        st.rerun()
-    
-    # =============================================================================
-    # GOVERNMENT SCHEMES - NO VOICE
-    # =============================================================================
-    elif page == get_text('schemes', selected_lang):
-        st.header(get_text('schemes', selected_lang))
-        
-        scheme_query = st.text_input(
-            get_text('ask_scheme', selected_lang),
-            placeholder="e.g., PM-KISAN, Soil Health Card..."
-        )
-        
-        if st.button(get_text('search', selected_lang), type="primary") and scheme_query:
-            with st.spinner("🏛️ Fetching..."):
-                info = ai_service.get_government_scheme_info(scheme_query, selected_lang)
-                
-                st.markdown("---")
-                st.markdown(info)
-        
-        st.markdown("---")
-        st.subheader(get_text('popular_schemes', selected_lang))
-        
-        schemes = [
-            ("PM-KISAN", "Pradhan Mantri Kisan Samman Nidhi"),
-            ("Soil Health Card", "Free soil testing"),
-            ("KCC", "Kisan Credit Card"),
-            ("PMFBY", "Crop Insurance"),
-            ("MIDH", "Horticulture Mission"),
-            ("NMOOP", "Oilseeds Mission")
-        ]
-        
-        cols = st.columns(3)
-        for idx, (short_name, full_name) in enumerate(schemes):
-            with cols[idx % 3]:
-                st.markdown(f"""
-                <div style="background-color:#E8F5E9; padding:15px; border-radius:8px; border:1px solid #A5D6A7;">
-                    <h4>{short_name}</h4>
-                    <p>{full_name}</p>
-                </div>
-                """, unsafe_allow_html=True)
-                if st.button(f"{get_text('search', selected_lang)} {short_name}", key=f"scheme_{idx}"):
-                    st.session_state.scheme_query = short_name
-                    st.rerun()
-    
-    # =============================================================================
-    # ORGANIC PRODUCTS - NO VOICE
-    # =============================================================================
-    elif page == get_text('products', selected_lang):
-        st.header(get_text('products', selected_lang))
-        
-        tab1, tab2 = st.tabs([get_text('browse_products', selected_lang), get_text('list_product', selected_lang)])
-        
-        with tab1:
-            st.subheader(get_text('browse_products', selected_lang))
-            
-            search = st.text_input(get_text('search', selected_lang))
-            
-            if search:
-                products = search_products(search)
-            else:
-                products = get_all_products(limit=50)
-            
-            if not products:
-                st.info("No products listed yet!")
-            else:
-                cols = st.columns(2)
-                for idx, product in enumerate(products):
-                    with cols[idx % 2]:
-                        st.markdown(f"""
-                        <div style="background-color:#FFF8E1; border:1px solid #FFE082; border-radius:10px; padding:15px; margin-bottom:15px;">
-                            <h3>🥬 {product['product_name']}</h3>
-                            <p><strong>Farmer:</strong> {product['farmer_name']}</p>
-                            <p><strong>{get_text('quantity', selected_lang)}:</strong> {product['quantity']}</p>
-                            <p><strong>{get_text('location', selected_lang)}:</strong> 📍 {product['location']}</p>
-                            <p><strong>{get_text('phone', selected_lang)}:</strong> 📞 {product['phone_number']}</p>
-                        </div>
-                        """, unsafe_allow_html=True)
-        
-        with tab2:
-            st.subheader(get_text('list_product', selected_lang))
-            
-            with st.form("product_form"):
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    farmer_name = st.text_input(get_text('your_name', selected_lang), value=user['farmer_name'])
-                    product_name = st.text_input(get_text('product_name', selected_lang), placeholder="e.g., Organic Tomatoes")
-                    quantity = st.text_input(get_text('quantity', selected_lang), placeholder="e.g., 50 kg")
-                
-                with col2:
-                    location = st.text_input(get_text('location', selected_lang), value=user['location'])
-                    phone = st.text_input(get_text('phone', selected_lang), value=user['mobile_email'])
-                
-                submitted = st.form_submit_button(get_text('list', selected_lang), type="primary")
-                
-                if submitted:
-                    if not all([farmer_name, product_name, quantity, location, phone]):
-                        st.error("Please fill all fields!")
-                    elif len(phone) < 10:
-                        st.error("Invalid phone number!")
-                    else:
-                        product_id = add_product(farmer_name, product_name, quantity, location, phone)
-                        st.success("Listed successfully!")
-                        st.balloons()
-                        st.rerun()
-    
-    # =============================================================================
-    # FOOTER - All Languages, Copyright 2026
-    # =============================================================================
-    ft = TRANSLATIONS.get(selected_lang, TRANSLATIONS['en'])
-    
-    st.markdown("---")
-    st.markdown(f"""
-    <div style="text-align: center; background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%); padding: 20px; border-radius: 15px; margin-top: 20px; border: 2px solid #4CAF50;">
-        <p style="font-size: 20px; margin-bottom: 8px;">🌾</p>
-        <p style="font-size: 16px; color: #1B5E20; margin-bottom: 5px; font-weight: bold;">
-            <strong>Krishi Mitra</strong>
-        </p>
-        <p style="font-size: 14px; color: #2E7D32; margin-bottom: 5px;">
-            {ft['tagline']}
-        </p>
-        <p style="font-size: 13px; color: #388E3C; margin-bottom: 8px;">
-            {ft['made_with_love']}
-        </p>
-        <p style="font-size: 11px; color: #666; border-top: 1px solid #A5D6A7; padding-top: 8px; margin-top: 8px;">
-            {ft['copyright']}
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-                    
+        st.markdown(f"""
+            <div class="km-page-banner">
+                <h2>{get_text('crop_knowledge', selected_lang)}</h2>
+                <p>Get complete growing guides, pest management, and harvest tips for any crop.</p>
+            </div>
+        """
