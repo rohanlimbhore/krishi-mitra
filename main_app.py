@@ -618,8 +618,14 @@ def inject_global_css():
     header     { visibility: hidden; }
 
     /* ── Scrollbar ── */
-    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f0fdf6; }
     ::-webkit-scrollbar-thumb { background: #b8ddc9; border-radius: 4px; }
+    /* Force main content to be scrollable */
+    [data-testid="stAppViewContainer"] > .main {
+    overflow-y: auto !important;
+    height: 100vh !important;
+    }
 
     /* ── Page header banner ── */
     .km-page-banner {
